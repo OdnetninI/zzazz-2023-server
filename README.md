@@ -12,13 +12,13 @@ Also, my writeup is on the way :)
 # Directory Structure
 - src: server sources
 - bios: BIOS files (only 1.3 is known) 
- + It is mapped in memory from 0x0000 to 0x0fff
+  + It is mapped in memory from 0x0000 to 0x0fff
 - boot: Main programs at boot
- + Mapped in memory at 0xf000
+  + Mapped in memory at 0xf000
 - fs: Filesystem of each machine
- + The structure is fs/$server_id/$file_block
- + $server_id is 0, 1, or 2 (see Usage for more information)
- + $file_block is a 1-byte index of the file
+  + The structure is fs/$server_id/$file_block
+  + $server_id is 0, 1, or 2 (see Usage for more information)
+  + $file_block is a 1-byte index of the file
 
 # Compiling
 It requires a typical modern C compiler.
