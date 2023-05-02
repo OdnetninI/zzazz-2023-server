@@ -23,16 +23,20 @@ Also, my writeup is on the way :)
 # Compiling
 It requires a typical modern C compiler.
 
-> git clone https://github.com/OdnetninI/zzazz-2023-server.git
-> cd zzazz-2023-server
-> make
+```
+git clone https://github.com/OdnetninI/zzazz-2023-server.git
+cd zzazz-2023-server
+make
+```
 
 Now the file *zzazz* file should be in the directory.
 
 # Usage
 For now, only local mode is available (it means no socket to connect to the internet).
 
-> ./zzazz server_id
+```
+./zzazz server_id
+```
 
 Servers id are:
 - 0 -> Server 13337 GRLTS01
