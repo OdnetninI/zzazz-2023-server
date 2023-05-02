@@ -19,71 +19,27 @@
 *    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.        *
 ****************************************************************************************/
 
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
+uint8_t memory[0xffff] = {0};
 
-uint8_t server_id = 0; /* 0 = 13337, 1 = 13338, 2 = 13339*/
-const char* server_boot[3] = {"boot/13337.boot.bin", "boot/13338.boot.bin", "boot/13339.boot.bin"};
+uint8_t mem_read(uint16_t addr) {
+    if (addr < 0x1000 && cpu.PC >= 0x1000) return 0x55;
+    return memory[addr];
+}
 
-#include "cpu.h"
-#include "memory.h"
-#include "syscall.h"
-#include "instructions.h"
-#include "opcode_table.h"
+void mem_write(uint16_t addr, uint8_t data) {
+    if (addr < 0x1000 && cpu.PC >= 0x1000) return;
+    memory[addr] = data;
+}
 
-int main(int argc, char* argv[]) {
+uint16_t mem_read_16(uint16_t addr) {
+    uint8_t low = mem_read(addr);
+    uint8_t high = mem_read(addr + 1);
+    return ((uint16_t)high << 8) | ((uint16_t)low);
+}
 
-    if (argc != 2) {
-        printf("Select a server 0 = 13337, 1 = 13338, 2 = 13339\n");
-        return 1;
-    }
-
-    server_id = argv[1][0] - '0';
-    if (server_id < 0 || server_id > 2) {
-        printf("Select a server 0 = 13337, 1 = 13338, 2 = 13339\n");
-        return 1;
-    }
-
-    initCPU();
-
-    FILE* f_bios = fopen("bios/bios.v1.3.bin", "r");
-    if (!f_bios) {
-        printf("BIOS: %s not found\n", "bios/bios.v1.3.bin");
-        return 1;
-    }
-    fseek(f_bios, 0, SEEK_END);
-    uint16_t f_bios_size = ftell(f_bios);
-    rewind(f_bios);
-    fread(&(memory[0x0000]), f_bios_size, 1, f_bios);
-    fclose(f_bios);
-
-    FILE* f_boot = fopen(server_boot[server_id], "r");
-    if (!f_boot) {
-        printf("BOOT: %s not found\n", server_boot[server_id]);
-        return 1;
-    }
-    fseek(f_boot, 0, SEEK_END);
-    uint16_t f_boot_size = ftell(f_boot);
-    rewind(f_boot);
-    fread(&(memory[0xf000]), f_boot_size, 1, f_boot);
-    fclose(f_boot);
-
-    while (true) {
-        uint16_t prev_pc = cpu.PC;
-
-        uint8_t opcode = memory[cpu.PC];
-        cpu.PC++;
-        
-        bool executed = instructions[opcode]();
-        if (!executed) {
-            printf("[%04x]Opcode %02x\n", prev_pc, opcode);
-            printf("R0: %04x, R1: %04x, R2: %04x, R3: %04x, SP: %04x\n", cpu.R0, cpu.R1, cpu.R2, cpu.R3, cpu.SP);
-            return 1;
-        }
-    }
-
-    return 0;
+void mem_write_16(uint16_t addr, uint16_t data) {
+    uint8_t low = data & 0xff;
+    uint16_t high = (data >> 8) & 0xff;
+    mem_write(addr, low);
+    mem_write(addr + 1, high);
 }

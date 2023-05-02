@@ -19,47 +19,91 @@
 *    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.        *
 ****************************************************************************************/
 
+/**
+ * Stack operations
+*/
+void push_16(uint16_t value) {
+    cpu.SP -= 2;
+    mem_write_16(cpu.SP, value);
+}
+
+uint16_t pop_16() {
+    uint16_t value = mem_read_16(cpu.SP);
+    cpu.SP += 2;
+    return value;
+}
+
+void push(uint8_t value) {
+    cpu.SP -= 1;
+    mem_write(cpu.SP, value);
+}
+
+uint8_t pop() {
+    uint8_t value = mem_read(cpu.SP);
+    cpu.SP += 1;
+    return value;
+}
+
+/**
+ * Compare
+*/
+void cmp(uint16_t a, uint16_t b) {
+    cpu.flag_z = false;
+    cpu.flag_l = false;
+    cpu.flag_g = false;
+    if (a == b) cpu.flag_z = true;
+    if (a < b) cpu.flag_l = true;
+    if (a > b) cpu.flag_g = true;
+}
+
+/**
+ * Opcode helper
+*/
+uint16_t read_op_imm() {
+    uint16_t imm = mem_read_16(cpu.PC);
+    cpu.PC += 2;
+    return imm;
+}
+
+/**
+ * Opcodes
+*/
 bool op_00() {
-    SP -= 2;
-    mem_write_16(SP, pc);
-    pc = 0xfff0;
+    push_16(cpu.PC);
+    cpu.PC = 0xfff0;
     return true;
 }
 
 bool op_01() {
-    uint16_t value = mem_read_16(pc);
-    pc += 2;
-    R0 = R0 * value;
+    uint16_t value = read_op_imm();
+    cpu.R0 = cpu.R0 * value;
     return true;
 }
 
 bool op_02() {
-    R0 = R0 * R1;
+    cpu.R0 = cpu.R0 * cpu.R1;
     return true;
 }
 
 bool op_03() {
-    uint16_t value = mem_read_16(pc);
-    pc += 2;
-    R0 = R0 / value;
+    uint16_t value = read_op_imm();
+    cpu.R0 = cpu.R0 / value;
     return true;
 }
 
 bool op_04() {
-    R0 = R0 / R1;
+    cpu.R0 = cpu.R0 / cpu.R1;
     return true;
 }
 
 bool op_05() {
-    uint16_t addr = mem_read_16(SP);
-    SP += 2;
-    pc = addr;
+    cpu.PC = pop_16();
     return true;
 }
 
 bool op_06() {
-    uint8_t syscall_id = mem_read(pc);
-    pc++;
+    uint8_t syscall_id = mem_read(cpu.PC);
+    cpu.PC++;
     return syscall(syscall_id);
 }
 
@@ -74,18 +118,17 @@ bool op_08() {
 }
 
 bool op_09() {
-    SP = mem_read_16(pc);
-    pc += 2;
+    cpu.SP = read_op_imm();
     return true;
 }
 
 bool op_0a() {
-    R0 = SP;
+    cpu.R0 = cpu.SP;
     return true;
 }
 
 bool op_0b() {
-    R1 = SP;
+    cpu.R1 = cpu.SP;
     return true;
 }
 
@@ -101,36 +144,32 @@ bool op_0d() {
 }
 
 bool op_0e() {
-    R0 = R0 << 1;
+    cpu.R0 = cpu.R0 << 1;
     return true;
 }
 
 bool op_0f() {
-    R0 = R0 >> 1;
+    cpu.R0 = cpu.R0 >> 1;
     return true;
 }
 
 bool op_10() {
-    R0 = mem_read_16(pc);
-    pc += 2;
+    cpu.R0 = read_op_imm();
     return true;
 }
 
 bool op_11() {
-    R1 = mem_read_16(pc);
-    pc += 2;
+    cpu.R1 = read_op_imm();
     return true;
 }
 
 bool op_12() {
-    R2 = mem_read_16(pc);
-    pc += 2;
+    cpu.R2 = read_op_imm();
     return true;
 }
 
 bool op_13() {
-    R3 = mem_read_16(pc);
-    pc += 2;
+    cpu.R3 = read_op_imm();
     return true;
 }
 
@@ -207,1007 +246,855 @@ bool op_1f() {
 }
 
 bool op_20() {
-    R0 = R0;
+    cpu.R0 = cpu.R0;
     return true;
 }
 
 bool op_21() {
-    R0 = R1;
+    cpu.R0 = cpu.R1;
     return true;
 }
 
 bool op_22() {
-    R0 = R2;
+    cpu.R0 = cpu.R2;
     return true;
 }
 
 bool op_23() {
-    R0 = R3;
+    cpu.R0 = cpu.R3;
     return true;
 }
 
 bool op_24() {
-    R1 = R0;
+    cpu.R1 = cpu.R0;
     return true;
 }
 
 bool op_25() {
-    R1 = R1;
+    cpu.R1 = cpu.R1;
     return true;
 }
 
 bool op_26() {
-    R1 = R2;
+    cpu.R1 = cpu.R2;
     return true;
 }
 
 bool op_27() {
-    R1 = R2;
+    cpu.R1 = cpu.R2;
     return true;
 }
 
 bool op_28() {
-    R2 = R0;
+    cpu.R2 = cpu.R0;
     return true;
 }
 
 bool op_29() {
-    R2 = R1;
+    cpu.R2 = cpu.R1;
     return true;
 }
 
 bool op_2a() {
-    R2 = R2;
+    cpu.R2 = cpu.R2;
     return true;
 }
 
 bool op_2b() {
-    R2 = R3;
+    cpu.R2 = cpu.R3;
     return true;
 }
 
 bool op_2c() {
-    R3 = R0;
+    cpu.R3 = cpu.R0;
     return true;
 }
 
 bool op_2d() {
-    R3 = R1;
+    cpu.R3 = cpu.R1;
     return true;
 }
 
 bool op_2e() {
-    R3 = R2;
+    cpu.R3 = cpu.R2;
     return true;
 }
 
 bool op_2f() {
-    R3 = R3;
+    cpu.R3 = cpu.R3;
     return true;
 }
 
 bool op_30() {
-    R0 += R0;
+    cpu.R0 += cpu.R0;
     return true;
 }
 
 bool op_31() {
-    R0 += R1;
+    cpu.R0 += cpu.R1;
     return true;
 }
 
 bool op_32() {
-    R0 += R2;
+    cpu.R0 += cpu.R2;
     return true;
 }
 
 bool op_33() {
-    R0 += R3;
+    cpu.R0 += cpu.R3;
     return true;
 }
 
 bool op_34() {
-    R1 += R0;
+    cpu.R1 += cpu.R0;
     return true;
 }
 
 bool op_35() {
-    R1 += R1;
+    cpu.R1 += cpu.R1;
     return true;
 }
 
 bool op_36() {
-    R1 += R2;
+    cpu.R1 += cpu.R2;
     return true;
 }
 
 bool op_37() {
-    R1 += R3;
+    cpu.R1 += cpu.R3;
     return true;
 }
 
 bool op_38() {
-    R2 += R0;
+    cpu.R2 += cpu.R0;
     return true;
 }
 
 bool op_39() {
-    R2 += R1;
+    cpu.R2 += cpu.R1;
     return true;
 }
 
 bool op_3a() {
-    R2 += R2;
+    cpu.R2 += cpu.R2;
     return true;
 }
 
 bool op_3b() {
-    R2 += R3;
+    cpu.R2 += cpu.R3;
     return true;
 }
 
 bool op_3c() {
-    R3 += R0;
+    cpu.R3 += cpu.R0;
     return true;
 }
 
 bool op_3d() {
-    R3 += R1;
+    cpu.R3 += cpu.R1;
     return true;
 }
 
 bool op_3e() {
-    R3 += R2;
+    cpu.R3 += cpu.R2;
     return true;
 }
 
 bool op_3f() {
-    R3 += R3;
+    cpu.R3 += cpu.R3;
     return true;
 }
 
 bool op_40() {
-    R0 = mem_read(R0);
+    cpu.R0 = mem_read(cpu.R0);
     return true;
 }
 
 bool op_41() {
-    R0 = mem_read(R1);
+    cpu.R0 = mem_read(cpu.R1);
     return true;
 }
 
 bool op_42() {
-    R0 = mem_read(R2);
+    cpu.R0 = mem_read(cpu.R2);
     return true;
 }
 
 bool op_43() {
-    R0 = mem_read(R3);
+    cpu.R0 = mem_read(cpu.R3);
     return true;
 }
 
 bool op_44() {
-    R1 = mem_read(R0);
+    cpu.R1 = mem_read(cpu.R0);
     return true;
 }
 
 bool op_45() {
-    R1 = mem_read(R1);
+    cpu.R1 = mem_read(cpu.R1);
     return true;
 }
 
 bool op_46() {
-    R1 = mem_read(R2);
+    cpu.R1 = mem_read(cpu.R2);
     return true;
 }
 
 bool op_47() {
-    R1 = mem_read(R3);
+    cpu.R1 = mem_read(cpu.R3);
     return true;
 }
 
 bool op_48() {
-    R2 = mem_read(R0);
+    cpu.R2 = mem_read(cpu.R0);
     return true;
 }
 
 bool op_49() {
-    R2 = mem_read(R1);
+    cpu.R2 = mem_read(cpu.R1);
     return true;
 }
 
 bool op_4a() {
-    R2 = mem_read(R2);
+    cpu.R2 = mem_read(cpu.R2);
     return true;
 }
 
 bool op_4b() {
-    R2 = mem_read(R3);
+    cpu.R2 = mem_read(cpu.R3);
     return true;
 }
 
 bool op_4c() {
-    R3 = mem_read(R0);
+    cpu.R3 = mem_read(cpu.R0);
     return true;
 }
 
 bool op_4d() {
-    R3 = mem_read(R1);
+    cpu.R3 = mem_read(cpu.R1);
     return true;
 }
 
 bool op_4e() {
-    R3 = mem_read(R2);
+    cpu.R3 = mem_read(cpu.R2);
     return true;
 }
 
 bool op_4f() {
-    R3 = mem_read(R3);
+    cpu.R3 = mem_read(cpu.R3);
     return true;
 }
 
 bool op_50() {
-    R0 = mem_read_16(R0);
+    cpu.R0 = mem_read_16(cpu.R0);
     return true;
 }
 
 bool op_51() {
-    R0 = mem_read_16(R1);
+    cpu.R0 = mem_read_16(cpu.R1);
     return true;
 }
 
 bool op_52() {
-    R0 = mem_read_16(R2);
+    cpu.R0 = mem_read_16(cpu.R2);
     return true;
 }
 
 bool op_53() {
-    R0 = mem_read_16(R3);
+    cpu.R0 = mem_read_16(cpu.R3);
     return true;
 }
 
 bool op_54() {
-    R1 = mem_read_16(R0);
+    cpu.R1 = mem_read_16(cpu.R0);
     return true;
 }
 
 bool op_55() {
-    R1 = mem_read_16(R1);
+    cpu.R1 = mem_read_16(cpu.R1);
     return true;
 }
 
 bool op_56() {
-    R1 = mem_read_16(R2);
+    cpu.R1 = mem_read_16(cpu.R2);
     return true;
 }
 
 bool op_57() {
-    R1 = mem_read_16(R3);
+    cpu.R1 = mem_read_16(cpu.R3);
     return true;
 }
 
 bool op_58() {
-    R2 = mem_read_16(R0);
+    cpu.R2 = mem_read_16(cpu.R0);
     return true;
 }
 
 bool op_59() {
-    R2 = mem_read_16(R1);
+    cpu.R2 = mem_read_16(cpu.R1);
     return true;
 }
 
 bool op_5a() {
-    R2 = mem_read_16(R2);
+    cpu.R2 = mem_read_16(cpu.R2);
     return true;
 }
 
 bool op_5b() {
-    R2 = mem_read_16(R3);
+    cpu.R2 = mem_read_16(cpu.R3);
     return true;
 }
 
 bool op_5c() {
-    R3 = mem_read_16(R0);
+    cpu.R3 = mem_read_16(cpu.R0);
     return true;
 }
 
 bool op_5d() {
-    R3 = mem_read_16(R1);
+    cpu.R3 = mem_read_16(cpu.R1);
     return true;
 }
 
 bool op_5e() {
-    R3 = mem_read_16(R2);
+    cpu.R3 = mem_read_16(cpu.R2);
     return true;
 }
 
 bool op_5f() {
-    R3 = mem_read_16(R3);
+    cpu.R3 = mem_read_16(cpu.R3);
     return true;
 }
 
 bool op_60() {
-    mem_write(R0, R0);
+    mem_write(cpu.R0, cpu.R0);
     return true;
 }
 
 bool op_61() {
-    mem_write(R0, R1);
+    mem_write(cpu.R0, cpu.R1);
     return true;
 }
 
 bool op_62() {
-    mem_write(R0, R2);
+    mem_write(cpu.R0, cpu.R2);
     return true;
 }
 
 bool op_63() {
-    mem_write(R0, R3);
+    mem_write(cpu.R0, cpu.R3);
     return true;
 }
 
 bool op_64() {
-    mem_write(R1, R0);
+    mem_write(cpu.R1, cpu.R0);
     return true;
 }
 
 bool op_65() {
-    mem_write(R1, R1);
+    mem_write(cpu.R1, cpu.R1);
     return true;
 }
 
 bool op_66() {
-    mem_write(R1, R2);
+    mem_write(cpu.R1, cpu.R2);
     return true;
 }
 
 bool op_67() {
-    mem_write(R1, R3);
+    mem_write(cpu.R1, cpu.R3);
     return true;
 }
 
 bool op_68() {
-    mem_write(R2, R0);
+    mem_write(cpu.R2, cpu.R0);
     return true;
 }
 
 bool op_69() {
-    mem_write(R2, R1);
+    mem_write(cpu.R2, cpu.R1);
     return true;
 }
 
 bool op_6a() {
-    mem_write(R2, R2);
+    mem_write(cpu.R2, cpu.R2);
     return true;
 }
 
 bool op_6b() {
-    mem_write(R2, R3);
+    mem_write(cpu.R2, cpu.R3);
     return true;
 }
 
 bool op_6c() {
-    mem_write(R3, R0);
+    mem_write(cpu.R3, cpu.R0);
     return true;
 }
 
 bool op_6d() {
-    mem_write(R3, R1);
+    mem_write(cpu.R3, cpu.R1);
     return true;
 }
 
 bool op_6e() {
-    mem_write(R3, R2);
+    mem_write(cpu.R3, cpu.R2);
     return true;
 }
 
 bool op_6f() {
-    mem_write(R3, R3);
+    mem_write(cpu.R3, cpu.R3);
     return true;
 }
 
 bool op_70() {
-    mem_write_16(R0, R0);
+    mem_write_16(cpu.R0, cpu.R0);
     return true;
 }
 
 bool op_71() {
-    mem_write_16(R0, R1);
+    mem_write_16(cpu.R0, cpu.R1);
     return true;
 }
 
 bool op_72() {
-    mem_write_16(R0, R2);
+    mem_write_16(cpu.R0, cpu.R2);
     return true;
 }
 
 bool op_73() {
-    mem_write_16(R0, R3);
+    mem_write_16(cpu.R0, cpu.R3);
     return true;
 }
 
 bool op_74() {
-    mem_write_16(R1, R0);
+    mem_write_16(cpu.R1, cpu.R0);
     return true;
 }
 
 bool op_75() {
-    mem_write_16(R1, R1);
+    mem_write_16(cpu.R1, cpu.R1);
     return true;
 }
 
 bool op_76() {
-    mem_write_16(R1, R2);
+    mem_write_16(cpu.R1, cpu.R2);
     return true;
 }
 
 bool op_77() {
-    mem_write_16(R1, R3);
+    mem_write_16(cpu.R1, cpu.R3);
     return true;
 }
 
 bool op_78() {
-    mem_write_16(R2, R0);
+    mem_write_16(cpu.R2, cpu.R0);
     return true;
 }
 
 bool op_79() {
-    mem_write_16(R2, R1);
+    mem_write_16(cpu.R2, cpu.R1);
     return true;
 }
 
 bool op_7a() {
-    mem_write_16(R2, R2);
+    mem_write_16(cpu.R2, cpu.R2);
     return true;
 }
 
 bool op_7b() {
-    mem_write_16(R2, R3);
+    mem_write_16(cpu.R2, cpu.R3);
     return true;
 }
 
 bool op_7c() {
-    mem_write_16(R3, R0);
+    mem_write_16(cpu.R3, cpu.R0);
     return true;
 }
 
 bool op_7d() {
-    mem_write_16(R3, R1);
+    mem_write_16(cpu.R3, cpu.R1);
     return true;
 }
 
 bool op_7e() {
-    mem_write_16(R3, R2);
+    mem_write_16(cpu.R3, cpu.R2);
     return true;
 }
 
 bool op_7f() {
-    mem_write_16(R3, R3);
+    mem_write_16(cpu.R3, cpu.R3);
     return true;
 }
 
 bool op_80() {
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R0 == R0) flag_z = true;
-    if (R0 < R0) flag_l = true;
-    if (R0 > R0) flag_g = true;
+    cmp(cpu.R0, cpu.R0);
     return true;
 }
 
 bool op_81() {
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R0 == R1) flag_z = true;
-    if (R0 < R1) flag_l = true;
-    if (R0 > R1) flag_g = true;
+    cmp(cpu.R0, cpu.R1);
     return true;
 }
 
 bool op_82() {
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R0 == R2) flag_z = true;
-    if (R0 < R2) flag_l = true;
-    if (R0 > R2) flag_g = true;
+    cmp(cpu.R0, cpu.R2);
     return true;
 }
 
 bool op_83() {
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R0 == R3) flag_z = true;
-    if (R0 < R3) flag_l = true;
-    if (R0 > R3) flag_g = true;
+    cmp(cpu.R0, cpu.R3);
     return true;
 }
 
 bool op_84() {
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R1 == R0) flag_z = true;
-    if (R1 < R0) flag_l = true;
-    if (R1 > R0) flag_g = true;
+    cmp(cpu.R1, cpu.R0);
     return true;
 }
 
 bool op_85() {
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R1 == R1) flag_z = true;
-    if (R1 < R1) flag_l = true;
-    if (R1 > R1) flag_g = true;
+    cmp(cpu.R1, cpu.R1);
     return true;
 }
 
 bool op_86() {
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R1 == R2) flag_z = true;
-    if (R1 < R2) flag_l = true;
-    if (R1 > R2) flag_g = true;
+    cmp(cpu.R1, cpu.R2);
     return true;
 }
 
 bool op_87() {
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R1 == R3) flag_z = true;
-    if (R1 < R3) flag_l = true;
-    if (R1 > R3) flag_g = true;
+    cmp(cpu.R1, cpu.R3);
     return true;
 }
 
 bool op_88() {
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R2 == R0) flag_z = true;
-    if (R2 < R0) flag_l = true;
-    if (R2 > R0) flag_g = true;
+    cmp(cpu.R2, cpu.R0);
     return true;
 }
 
 bool op_89() {
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R2 == R1) flag_z = true;
-    if (R2 < R1) flag_l = true;
-    if (R2 > R1) flag_g = true;
+    cmp(cpu.R2, cpu.R1);
     return true;
 }
 
 bool op_8a() {
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R2 == R2) flag_z = true;
-    if (R2 < R2) flag_l = true;
-    if (R2 > R2) flag_g = true;
+    cmp(cpu.R2, cpu.R2);
     return true;
 }
 
 bool op_8b() {
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R2 == R3) flag_z = true;
-    if (R2 < R3) flag_l = true;
-    if (R2 > R3) flag_g = true;
+    cmp(cpu.R2, cpu.R3);
     return true;
 }
 
 bool op_8c() {
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R3 == R0) flag_z = true;
-    if (R3 < R0) flag_l = true;
-    if (R3 > R0) flag_g = true;
+    cmp(cpu.R3, cpu.R0);
     return true;
 }
 
 bool op_8d() {
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R3 == R1) flag_z = true;
-    if (R3 < R1) flag_l = true;
-    if (R3 > R1) flag_g = true;
+    cmp(cpu.R3, cpu.R1);
     return true;
 }
 
 bool op_8e() {
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R3 == R2) flag_z = true;
-    if (R3 < R2) flag_l = true;
-    if (R3 > R2) flag_g = true;
+    cmp(cpu.R3, cpu.R2);
     return true;
 }
 
 bool op_8f() {
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R3 == R3) flag_z = true;
-    if (R3 < R3) flag_l = true;
-    if (R3 > R3) flag_g = true;
+    cmp(cpu.R3, cpu.R3);
     return true;
 }
 
 bool op_90() {
-    SP -= 2;
-    mem_write_16(SP, R0);
+    push_16(cpu.R0);
     return true;
 }
 
 bool op_91() {
-    SP -= 2;
-    mem_write_16(SP, R1);
+    push_16(cpu.R1);
     return true;
 }
 
 bool op_92() {
-    SP -= 2;
-    mem_write_16(SP, R2);
+    push_16(cpu.R2);
     return true;
 }
 
 bool op_93() {
-    SP -= 2;
-    mem_write_16(SP, R3);
+    push_16(cpu.R3);
     return true;
 }
 
 bool op_94() {
-    R0 = mem_read_16(SP);
-    SP += 2;
+    cpu.R0 = pop_16();
     return true;
 }
 
 bool op_95() {
-    R1 = mem_read_16(SP);
-    SP += 2;
+    cpu.R1 = pop_16();
     return true;
 }
 
 bool op_96() {
-    R2 = mem_read_16(SP);
-    SP += 2;
+    cpu.R2 = pop_16();
     return true;
 }
 
 bool op_97() {
-    R3 = mem_read_16(SP);
-    SP += 2;
+    cpu.R3 = pop_16();
     return true;
 }
 
 bool op_98() {
-    uint16_t dest_addr = mem_read_16(pc);
-    pc = dest_addr;
+    uint16_t dest_addr = mem_read_16(cpu.PC);
+    cpu.PC = dest_addr;
     return true;
 }
 
 bool op_99() {
-    uint16_t dest_addr = mem_read_16(pc);
-    pc += 2;
+    uint16_t dest_addr = read_op_imm();
 
-    SP -= 2;
-    mem_write_16(SP, pc);
+    push_16(cpu.PC);
 
-    pc = dest_addr;
+    cpu.PC = dest_addr;
     return true;
 }
 
 bool op_9a() {
-    uint16_t value = mem_read_16(pc);
-    pc += 2;
+    uint16_t value = read_op_imm();
 
-    if (flag_l) pc = value;
+    if (cpu.flag_l) cpu.PC = value;
     return true;
 }
 
 bool op_9b() {
-    uint16_t value = mem_read_16(pc);
-    pc += 2;
+    uint16_t value = read_op_imm();
     
-    if (flag_g) pc = value;
+    if (cpu.flag_g) cpu.PC = value;
     return true;
 }
 
 bool op_9c() {
-    uint16_t value = mem_read_16(pc);
-    pc += 2;
+    uint16_t value = read_op_imm();
     
-    if (flag_z) pc = value;
+    if (cpu.flag_z) cpu.PC = value;
     return true;
 }
 
 bool op_9d() {
-    uint16_t value = mem_read_16(pc);
-    pc += 2;
+    uint16_t value = read_op_imm();
     
-    if (!flag_z) pc = value;
+    if (!cpu.flag_z) cpu.PC = value;
     return true;
 }
 
 bool op_9e() {
-    uint16_t dest_addr = mem_read_16(pc);
-    pc += 2;
+    uint16_t dest_addr = read_op_imm();
 
-    if (flag_l) {
-        SP -= 2;
-        mem_write_16(SP, pc);        
-
-        pc = dest_addr;
+    if (cpu.flag_l) {
+        push_16(cpu.PC);
+        cpu.PC = dest_addr;
     }
     return true;
 }
 
 bool op_9f() {
-    uint16_t dest_addr = mem_read_16(pc);
-    pc += 2;
+    uint16_t dest_addr = read_op_imm();
 
-    if (flag_g) {
-        SP -= 2;
-        mem_write_16(SP, pc);
-
-        pc = dest_addr;
+    if (cpu.flag_g) {
+        push_16(cpu.PC);
+        cpu.PC = dest_addr;
     }
     return true;
 }
 
 bool op_a0() {
-    uint16_t dest_addr = mem_read_16(pc);
-    pc += 2;
+    uint16_t dest_addr = read_op_imm();
 
-    if (flag_z) {
-        SP -= 2;
-        mem_write_16(SP, pc);
-
-        pc = dest_addr;
+    if (cpu.flag_z) {
+        push_16(cpu.PC);
+        cpu.PC = dest_addr;
     }
     return true;
 }
 
 bool op_a1() {
-    uint16_t dest_addr = mem_read_16(pc);
-    pc += 2;
+    uint16_t dest_addr = read_op_imm();
 
-    if (!flag_z) {
-        SP -= 2;
-        mem_write_16(SP, pc);
-
-        pc = dest_addr;
+    if (!cpu.flag_z) {
+        push_16(cpu.PC);
+        cpu.PC = dest_addr;
     }
     return true;
 }
 
 bool op_a2() {
-    uint16_t value = mem_read_16(pc);
-    pc += 2;
-
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R0 == value) flag_z = true;
-    if (R0 < value) flag_l = true;
-    if (R0 > value) flag_g = true;
+    uint16_t value = read_op_imm();
+    cmp(cpu.R0, value);
     return true;
 }
 
 bool op_a3() {
-    uint16_t value = mem_read_16(pc);
-    pc += 2;
-
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R1 == value) flag_z = true;
-    if (R1 < value) flag_l = true;
-    if (R1 > value) flag_g = true;
+    uint16_t value = read_op_imm();
+    cmp(cpu.R1, value);
     return true;
 }
 
 bool op_a4() {
-    uint16_t value = mem_read_16(pc);
-    pc += 2;
-
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R2 == value) flag_z = true;
-    if (R2 < value) flag_l = true;
-    if (R2 > value) flag_g = true;
+    uint16_t value = read_op_imm();
+    cmp(cpu.R2, value);
     return true;
 }
 
 bool op_a5() {
-    uint16_t value = mem_read_16(pc);
-    pc += 2;
-
-    flag_z = false;
-    flag_l = false;
-    flag_g = false;
-    if (R3 == value) flag_z = true;
-    if (R3 < value) flag_l = true;
-    if (R3 > value) flag_g = true;
+    uint16_t value = read_op_imm();
+    cmp(cpu.R3, value);
     return true;
 }
 
 bool op_a6() {
-    SP -= 2;
-    mem_write_16(SP, SP);
+    push_16(cpu.SP);
     return true;
 }
 
 bool op_a7() {
-    SP -= 2;
-    mem_write_16(SP, pc - 1);
+    push_16(cpu.PC - 1);
     return true;
 }
 
 bool op_a8() {
-    R0++;
+    cpu.R0++;
     return true;
 }
 
 bool op_a9() {
-    R1++;
+    cpu.R1++;
     return true;
 }
 
 bool op_aa() {
-    R2++;
+    cpu.R2++;
     return true;
 }
 
 bool op_ab() {
-    R3++;
+    cpu.R3++;
     return true;
 }
 
 bool op_ac() {
-    R0--;
+    cpu.R0--;
     return true;
 }
 
 bool op_ad() {
-    R1--;
+    cpu.R1--;
     return true;
 }
 
 bool op_ae() {
-    R2--;
+    cpu.R2--;
     return true;
 }
 
 bool op_af() {
-    R3--;
+    cpu.R3--;
     return true;
 }
 
 bool op_b0() {
-    uint16_t address = mem_read_16(pc);
-    pc += 2;
-    R0 = mem_read(address);
+    uint16_t address = read_op_imm();
+    cpu.R0 = mem_read(address);
     return true;
 }
 
 bool op_b1() {
-    uint16_t address = mem_read_16(pc);
-    pc += 2;
-    R1 = mem_read(address);
+    uint16_t address = read_op_imm();
+    cpu.R1 = mem_read(address);
     return true;
 }
 
 bool op_b2() {
-    uint16_t address = mem_read_16(pc);
-    pc += 2;
-    R2 = mem_read(address);
+    uint16_t address = read_op_imm();
+    cpu.R2 = mem_read(address);
     return true;
 }
 
 bool op_b3() {
-    uint16_t address = mem_read_16(pc);
-    pc += 2;
-    R3 = mem_read(address);
+    uint16_t address = read_op_imm();
+    cpu.R3 = mem_read(address);
     return true;
 }
 
 bool op_b4() {
-    uint16_t address = mem_read_16(pc);
-    pc += 2;
-    R0 = mem_read_16(address);
+    uint16_t address = read_op_imm();
+    cpu.R0 = mem_read_16(address);
     return true;
 }
 
 bool op_b5() {
-    uint16_t address = mem_read_16(pc);
-    pc += 2;
-    R1 = mem_read_16(address);
+    uint16_t address = read_op_imm();
+    cpu.R1 = mem_read_16(address);
     return true;
 }
 
 bool op_b6() {
-    uint16_t address = mem_read_16(pc);
-    pc += 2;
-    R2 = mem_read_16(address);
+    uint16_t address = read_op_imm();
+    cpu.R2 = mem_read_16(address);
     return true;
 }
 
 bool op_b7() {
-    uint16_t address = mem_read_16(pc);
-    pc += 2;
-    R3 = mem_read_16(address);
+    uint16_t address = read_op_imm();
+    cpu.R3 = mem_read_16(address);
     return true;
 }
 
 bool op_b8() {
-    uint16_t address = mem_read_16(pc);
-    pc += 2;
-    mem_write(address, R0 & 0xff);
+    uint16_t address = read_op_imm();
+    mem_write(address, cpu.R0 & 0xff);
     return true;
 }
 
 bool op_b9() {
-    uint16_t address = mem_read_16(pc);
-    pc += 2;
-    mem_write(address, R1 & 0xff);
+    uint16_t address = read_op_imm();
+    mem_write(address, cpu.R1 & 0xff);
     return true;
 }
 
 bool op_ba() {
-    uint16_t address = mem_read_16(pc);
-    pc += 2;
-    mem_write(address, R2 & 0xff);
+    uint16_t address = read_op_imm();
+    mem_write(address, cpu.R2 & 0xff);
     return true;
 }
 
 bool op_bb() {
-    uint16_t address = mem_read_16(pc);
-    pc += 2;
-    mem_write(address, R3 & 0xff);
+    uint16_t address = read_op_imm();
+    mem_write(address, cpu.R3 & 0xff);
     return true;
 }
 
 bool op_bc() {
-    uint16_t address = mem_read_16(pc);
-    pc += 2;
-    mem_write_16(address, R0);
+    uint16_t address = read_op_imm();
+    mem_write_16(address, cpu.R0);
     return true;
 }
 
 bool op_bd() {
-    uint16_t address = mem_read_16(pc);
-    pc += 2;
-    mem_write_16(address, R1);
+    uint16_t address = read_op_imm();
+    mem_write_16(address, cpu.R1);
     return true;
 }
 
 bool op_be() {
-    uint16_t address = mem_read_16(pc);
-    pc += 2;
-    mem_write_16(address, R2);
+    uint16_t address = read_op_imm();
+    mem_write_16(address, cpu.R2);
     return true;
 }
 
 bool op_bf() {
-    uint16_t address = mem_read_16(pc);
-    pc += 2;
-    mem_write_16(address, R3);
+    uint16_t address = read_op_imm();
+    mem_write_16(address, cpu.R3);
     return true;
 }
 
@@ -1242,179 +1129,168 @@ bool op_c4() {
 }
 
 bool op_c5() {
-    pc = R0;
+    cpu.PC = cpu.R0;
     return true;
 }
 
 bool op_c6() {
-    pc = R1;
+    cpu.PC = cpu.R1;
     return true;
 }
 
 bool op_c7() {
-    pc = R2;
+    cpu.PC = cpu.R2;
     return true;
 }
 
 bool op_c8() {
-    pc = R3;
+    cpu.PC = cpu.R3;
     return true;
 }
 
 bool op_c9() {
-    SP -= 2;
-    mem_write_16(SP, pc);
-    pc = R0;
+    push_16(cpu.PC);
+    cpu.PC = cpu.R0;
     return true;
 }
 
 bool op_ca() {
-    SP -= 2;
-    mem_write_16(SP, pc);
-    pc = R1;
+    push_16(cpu.PC);
+    cpu.PC = cpu.R1;
     return true;
 }
 
 bool op_cb() {
-    SP -= 2;
-    mem_write_16(SP, pc);
-    pc = R2;
+    push_16(cpu.PC);
+    cpu.PC = cpu.R2;
     return true;
 }
 
 bool op_cc() {
-    SP -= 2;
-    mem_write_16(SP, pc);
-    pc = R3;
+    push_16(cpu.PC);
+    cpu.PC = cpu.R3;
     return true;
 }
 
 bool op_cd() {
-    uint16_t value = mem_read_16(pc);
-    pc += 2;
-    R0 = R0 & value;
+    uint16_t value = read_op_imm();
+    cpu.R0 = cpu.R0 & value;
     return true;
 }
 
 bool op_ce() {
-    uint16_t value = mem_read_16(pc);
-    pc += 2;
-    R0 = R0 | value;
+    uint16_t value = read_op_imm();
+    cpu.R0 = cpu.R0 | value;
     return true;
 }
 
 bool op_cf() {
-uint16_t value = mem_read_16(pc);
-    pc += 2;
-    R0 = R0 ^ value;
+uint16_t value = read_op_imm();
+    cpu.R0 = cpu.R0 ^ value;
     return true;
 }
 
 bool op_d0() {
-    R0 = R0 & R0;
+    cpu.R0 = cpu.R0 & cpu.R0;
     return true;
 }
 
 bool op_d1() {
-    R0 = R0 & R1;
+    cpu.R0 = cpu.R0 & cpu.R1;
     return true;
 }
 
 bool op_d2() {
-    R0 = R0 & R2;
+    cpu.R0 = cpu.R0 & cpu.R2;
     return true;
 }
 
 bool op_d3() {
-    R0 = R0 & R3;
+    cpu.R0 = cpu.R0 & cpu.R3;
     return true;
 }
 
 bool op_d4() {
-    R0 = R0 | R0;
+    cpu.R0 = cpu.R0 | cpu.R0;
     return true;
 }
 
 bool op_d5() {
-    R0 = R0 | R1;
+    cpu.R0 = cpu.R0 | cpu.R1;
     return true;
 }
 
 bool op_d6() {
-    R0 = R0 | R2;
+    cpu.R0 = cpu.R0 | cpu.R2;
     return true;
 }
 
 bool op_d7() {
-    R0 = R0 | R3;
+    cpu.R0 = cpu.R0 | cpu.R3;
     return true;
 }
 
 bool op_d8() {
-    R0 = R0 ^ R0;
+    cpu.R0 = cpu.R0 ^ cpu.R0;
     return true;
 }
 
 bool op_d9() {
-    R0 = R0 ^ R1;
+    cpu.R0 = cpu.R0 ^ cpu.R1;
     return true;
 }
 
 bool op_da() {
-    R0 = R0 ^ R2;
+    cpu.R0 = cpu.R0 ^ cpu.R2;
     return true;
 }
 
 bool op_db() {
-    R0 = R0 ^ R3;
+    cpu.R0 = cpu.R0 ^ cpu.R3;
     return true;
 }
 
 bool op_dc() {
-    R0 = (R0 >> 8) | (R0 << 8);
+    cpu.R0 = (cpu.R0 >> 8) | (cpu.R0 << 8);
     return true;
 }
 
 bool op_dd() {
-    R0 = (R0 >> 8) | (R0 << 8);
+    cpu.R0 = (cpu.R0 >> 8) | (cpu.R0 << 8);
     return true;
 }
 
 bool op_de() {
-    R0 = (R0 >> 8) | (R0 << 8);
+    cpu.R0 = (cpu.R0 >> 8) | (cpu.R0 << 8);
     return true;
 }
 
 bool op_df() {
-    R0 = (R0 >> 8) | (R0 << 8);
+    cpu.R0 = (cpu.R0 >> 8) | (cpu.R0 << 8);
     return true;
 }
 
 bool op_e0() {
-    uint16_t value = mem_read_16(pc);
-    pc += 2;
-    R0 += value;
+    uint16_t value = read_op_imm();
+    cpu.R0 += value;
     return true;
 }
 
 bool op_e1() {
-    uint16_t value = mem_read_16(pc);
-    pc += 2;
-    R1 += value;
+    uint16_t value = read_op_imm();
+    cpu.R1 += value;
     return true;
 }
 
 bool op_e2() {
-    uint16_t value = mem_read_16(pc);
-    pc += 2;
-    R2 += value;
+    uint16_t value = read_op_imm();
+    cpu.R2 += value;
     return true;
 }
 
 bool op_e3() {
-    uint16_t value = mem_read_16(pc);
-    pc += 2;
-    R3 += value;
+    uint16_t value = read_op_imm();
+    cpu.R3 += value;
     return true;
 }
 

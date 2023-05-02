@@ -20,6 +20,10 @@ BIN=zzazz
 
 HEADERS_RAW= \
 	instructions.h \
+	cpu.h \
+	memory.h \
+	syscall.h \
+	opcode_table.h \
 
 SOURCES_RAW= \
 	main.c \
@@ -55,7 +59,7 @@ $(BINDIR):
 $(BIN): $(OBJECTS)
 	$(LD) $(LDFLAGS) -o $@ $(OBJECTS)
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.c
+$(OBJDIR)/%.o: $(SRCDIR)/%.c $(HEADERS)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 $(SRCDIR)/%.c: $(HEADERS)

@@ -19,71 +19,70 @@
 *    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.        *
 ****************************************************************************************/
 
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
+void read_file(uint16_t addr, uint16_t file) {
+    char filename[16];
+    snprintf(filename, 16, "fs/%d/%02x", server_id, file);
 
-uint8_t server_id = 0; /* 0 = 13337, 1 = 13338, 2 = 13339*/
-const char* server_boot[3] = {"boot/13337.boot.bin", "boot/13338.boot.bin", "boot/13339.boot.bin"};
+    FILE* f_file = fopen(filename, "r");
+    if (!f_file) return;
 
-#include "cpu.h"
-#include "memory.h"
-#include "syscall.h"
-#include "instructions.h"
-#include "opcode_table.h"
+    fseek(f_file, 0, SEEK_END);
+    uint16_t f_file_size = ftell(f_file);
+    rewind(f_file);
+    fread(&(memory[addr]), f_file_size, 1, f_file);
+    fclose(f_file);    
+}
 
-int main(int argc, char* argv[]) {
+uint8_t math_test_current = 0;
+#define math_test_max 8
 
-    if (argc != 2) {
-        printf("Select a server 0 = 13337, 1 = 13338, 2 = 13339\n");
-        return 1;
+struct _math_test {
+    uint16_t question;
+    uint16_t answer;
+};
+
+struct _math_test math_test[math_test_max] = {
+    {0x0539, 0x0024},
+    {0x4c22, 0x008b},
+    {0x9e3f, 0x00c9},
+    {0x9610, 0x00c4},
+    {0x0000, 0x0000},
+    {0x403d, 0x0080},
+    {0x3021, 0x006f},
+    {0x1e61, 0x0058},
+};
+
+bool syscall(uint8_t id) {
+    switch (id) {
+        case 0x01: printf("%c", cpu.R0 & 0xff); break;
+        case 0x02:
+            char c = 0;
+            scanf("%c", &c);
+            cpu.R0 = c;
+            break;
+        case 0x03: printf("Exit\n"); exit(0);
+        case 0x04: read_file(cpu.R1, cpu.R0); break;
+        case 0x05: cpu.R0 = rand(); break;
+
+
+        case 0x64: cpu.R0 = math_test[math_test_current].question; break;
+        case 0x65: 
+            if (cpu.R0 == math_test[math_test_current].answer) {
+                if(math_test_current + 1 == math_test_max) {
+                    printf("Test successful! FOOLS2023_{UnknownArchitectureMath}\n");
+                    cpu.R0 = 0x00;
+                }
+                else {
+                    math_test_current++;
+                    cpu.R0 = 0x01;
+                }
+            }
+            else {
+                cpu.R0 = 0x02;
+            }
+            break;
+        case 0x66: math_test_current = 0; break;
+        default: return false;
     }
-
-    server_id = argv[1][0] - '0';
-    if (server_id < 0 || server_id > 2) {
-        printf("Select a server 0 = 13337, 1 = 13338, 2 = 13339\n");
-        return 1;
-    }
-
-    initCPU();
-
-    FILE* f_bios = fopen("bios/bios.v1.3.bin", "r");
-    if (!f_bios) {
-        printf("BIOS: %s not found\n", "bios/bios.v1.3.bin");
-        return 1;
-    }
-    fseek(f_bios, 0, SEEK_END);
-    uint16_t f_bios_size = ftell(f_bios);
-    rewind(f_bios);
-    fread(&(memory[0x0000]), f_bios_size, 1, f_bios);
-    fclose(f_bios);
-
-    FILE* f_boot = fopen(server_boot[server_id], "r");
-    if (!f_boot) {
-        printf("BOOT: %s not found\n", server_boot[server_id]);
-        return 1;
-    }
-    fseek(f_boot, 0, SEEK_END);
-    uint16_t f_boot_size = ftell(f_boot);
-    rewind(f_boot);
-    fread(&(memory[0xf000]), f_boot_size, 1, f_boot);
-    fclose(f_boot);
-
-    while (true) {
-        uint16_t prev_pc = cpu.PC;
-
-        uint8_t opcode = memory[cpu.PC];
-        cpu.PC++;
-        
-        bool executed = instructions[opcode]();
-        if (!executed) {
-            printf("[%04x]Opcode %02x\n", prev_pc, opcode);
-            printf("R0: %04x, R1: %04x, R2: %04x, R3: %04x, SP: %04x\n", cpu.R0, cpu.R1, cpu.R2, cpu.R3, cpu.SP);
-            return 1;
-        }
-    }
-
-    return 0;
+    return true;    
 }
