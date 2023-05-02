@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <time.h>
 
 uint8_t server_id = 0; /* 0 = 13337, 1 = 13338, 2 = 13339*/
 const char* server_boot[3] = {"boot/13337.boot.bin", "boot/13338.boot.bin", "boot/13339.boot.bin"};
@@ -35,7 +36,9 @@ const char* server_boot[3] = {"boot/13337.boot.bin", "boot/13338.boot.bin", "boo
 #include "opcode_table.h"
 
 int main(int argc, char* argv[]) {
-
+    /**
+     * Which server should be run
+     */ 
     if (argc != 2) {
         printf("Select a server 0 = 13337, 1 = 13338, 2 = 13339\n");
         return 1;
@@ -47,8 +50,14 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    /**
+     * Init CPU registers and random seed
+     */ 
     initCPU();
 
+    /**
+     * Load the BIOS
+     */ 
     FILE* f_bios = fopen("bios/bios.v1.3.bin", "r");
     if (!f_bios) {
         printf("BIOS: %s not found\n", "bios/bios.v1.3.bin");
@@ -60,6 +69,9 @@ int main(int argc, char* argv[]) {
     fread(&(memory[0x0000]), f_bios_size, 1, f_bios);
     fclose(f_bios);
 
+    /**
+     * Load the boot program
+     */ 
     FILE* f_boot = fopen(server_boot[server_id], "r");
     if (!f_boot) {
         printf("BOOT: %s not found\n", server_boot[server_id]);
@@ -71,16 +83,26 @@ int main(int argc, char* argv[]) {
     fread(&(memory[0xf000]), f_boot_size, 1, f_boot);
     fclose(f_boot);
 
+    /**
+     * Main Loop
+     */ 
     while (true) {
+        // prev_pc is for debugging, until all opcodes are implemented
         uint16_t prev_pc = cpu.PC;
 
+        // Fetch the instruction
         uint8_t opcode = memory[cpu.PC];
         cpu.PC++;
         
+        // Execute the instruction
         bool executed = instructions[opcode]();
+
+        // Check if the instruction was executed
         if (!executed) {
+            // Remove this when all opcodes are implemented
             printf("[%04x]Opcode %02x\n", prev_pc, opcode);
             printf("R0: %04x, R1: %04x, R2: %04x, R3: %04x, SP: %04x\n", cpu.R0, cpu.R1, cpu.R2, cpu.R3, cpu.SP);
+
             return 1;
         }
     }

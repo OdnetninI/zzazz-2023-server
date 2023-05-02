@@ -52,21 +52,34 @@ struct _math_test math_test[math_test_max] = {
     {0x1e61, 0x0058},
 };
 
+enum SYSCALLS {
+    SYS_UNKNOWN = 0x00,
+    SYS_PRINT,
+    SYS_READ,
+    SYS_EXIT,
+    SYS_READFILE,
+    SYS_RAND,
+
+    SYS_MATH_GET = 0x64,
+    SYS_MATH_CHECK_AND_NEXT = 0x65,
+    SYS_MATH_RESET = 0x66
+};
+
 bool syscall(uint8_t id) {
     switch (id) {
-        case 0x01: printf("%c", cpu.R0 & 0xff); break;
-        case 0x02:
+        case SYS_PRINT: printf("%c", cpu.R0 & 0xff); break;
+        case SYS_READ:
             char c = 0;
             scanf("%c", &c);
             cpu.R0 = c;
             break;
-        case 0x03: printf("Exit\n"); exit(0);
-        case 0x04: read_file(cpu.R1, cpu.R0); break;
-        case 0x05: cpu.R0 = rand(); break;
+        case SYS_EXIT: printf("Exit\n"); exit(0);
+        case SYS_READFILE: read_file(cpu.R1, cpu.R0); break;
+        case SYS_RAND: cpu.R0 = rand(); break;
 
 
-        case 0x64: cpu.R0 = math_test[math_test_current].question; break;
-        case 0x65: 
+        case SYS_MATH_GET: cpu.R0 = math_test[math_test_current].question; break;
+        case SYS_MATH_CHECK_AND_NEXT: 
             if (cpu.R0 == math_test[math_test_current].answer) {
                 if(math_test_current + 1 == math_test_max) {
                     printf("Test successful! FOOLS2023_{UnknownArchitectureMath}\n");
@@ -81,7 +94,7 @@ bool syscall(uint8_t id) {
                 cpu.R0 = 0x02;
             }
             break;
-        case 0x66: math_test_current = 0; break;
+        case SYS_MATH_RESET: math_test_current = 0; break;
         default: return false;
     }
     return true;    

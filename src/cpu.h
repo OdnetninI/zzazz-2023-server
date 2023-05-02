@@ -34,7 +34,11 @@ struct CPU {
 } cpu;
 
 void initCPU() {
+    // Entry point
     cpu.PC = 0xf000;
 
-    srand(42);
+    // Initialize random
+    time_t rawtime;
+    time(&rawtime);
+    srand(rawtime);
 }
