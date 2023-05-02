@@ -48,8 +48,8 @@ Servers id are:
 - [ ] Opcode 0x07
 - [ ] NOP delay? *
 - [ ] Sockets (For network operation)
-- [ ] Cleanup
-- [ ] Math test data
+- [x] Cleanup
+- [x] Math test data
 
 * There are two NOPs, but knowing that one of the attacks was a timing attack, one of those NOPs, probably, needs a delay to slow down the execution.
 
