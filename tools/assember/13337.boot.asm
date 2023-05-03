@@ -1,383 +1,387 @@
-entry f000
-	
-$print    0008
-$strcmp   0010
-$findidx  0018
-$convhex  0020
-$memcpy   0028
-$readstr  0030
-$strtrim  0038
-$memset   0040
+entry #f000  ; Default entry point of the boot programs
 
-$sys_write 0001
-$sys_read  0002	
-$sys_exit  0003
-$sys_file  0004
-$sys_rand  0005
-	
-	movi sp, ff00
-	movi r0, fff0
-	movi r1, 0098
-	stb  r1, [r0]
-	inc  r0
-	movt r1, :break_mng
-	st   r1, [r0]
-	movl r2, .welcome_text
-	call_v $print
+; BIOS provided functions
+$print    #0008
+$strcmp   #0010
+$findidx  #0018
+$convhex  #0020
+$memcpy   #0028
+$readstr  #0030
+$strtrim  #0038
+$memset   #0040
+
+; Syscalls
+$sys_write #0001
+$sys_read  #0002	
+$sys_exit  #0003
+$sys_file  #0004
+$sys_rand  #0005
+
+; Entry Point
+	mov %sp, #ff00
+	mov %r0, #fff0
+	mov %r1, #0098
+	stb  %r1, [%r0]
+	inc  %r0
+	mov %r1, :break_mng
+	st   %r1, [%r0]
+	mov %r2, .welcome_text
+	call $print
 	break
-	movl r2, .dry_stack
-	call_v $print
-	sys_v $sys_exit
-	jump f01e
+	mov %r2, .dry_stack
+	call $print
+	sys $sys_exit
+:infinite_loop
+	jump :infinite_loop
 
 :break_mng
-	push sp
-	sti  r0, [fb3e]
-	sti  r1, [fb40]
-	sti  r2, [fb42]
-	sti  r3, [fb44]
-	pop  r0
-	sti  r0, [fb46]
-	mov  r0, sp
-	ld   r0, [r0]
-	addi r0, ffff
-	sti  r0, [fb48]
-	movi r1, 000c
-	movi r2 fb4a
-	ldi  r3, [fb46]
-	call_v $memcpy
-	movl r2, .break
-	call_v $print
+	push %sp
+	st  %r0, [#fb3e]
+	st  %r1, [#fb40]
+	st  %r2, [#fb42]
+	st  %r3, [#fb44]
+	pop %r0
+	st  %r0, [#fb46]
+	mov %r0, %sp
+	ld  %r0, [%r0]
+	add %r0, #ffff
+	st  %r0, [#fb48]
+	mov %r1, #000c
+	mov %r2 #fb4a
+	ld  %r3, [#fb46]
+	call $memcpy
+	mov %r2, .break
+	call $print
 
 :ask_for_cmd
-	movi r0, 0000
-	stbi r0, [e002]
-	movl r2, .ready
-	call_v $print
-	movi r2, e000
-	movi r3, 0008
-	call_v $readstr
-	cmpi r3, 0000
-	jz   f0dc
-	movi r2, e000
-	call_v $strtrim
-	ldbi r0, [e002]
-	cmpi r0, 0
-	jnz f0d3
-	ldi r0, [e000]
-	cmpi r0, 0a68
-	jz_t :help
-	cmpi r0, 0068
-	jz_t :help
-	cmpi r0, 0072
-	jz_t :read_cmd
-	cmpi r0, 0a72
-	jz_t :read_cmd
-	cmpi r0, 0070
-	jz_t :print_cmd
-	cmpi r0, 0a70
-	jz_t :print_cmd
-	cmpi r0, 0078
-	jz_t :exec_cmd
-	cmpi r0, 0a78
-	jz_t :exec_cmd
-	cmpi r0, 0063
-	jz_t :continue_cmd
-	cmpi r0, 0a63
-	jz_t :continue_cmd
-	cmpi r0, 4355
-	jz_t :secret_cmd
-	cmpi r0, 736c
-	jz_t :ls_cmd
-	cmpi r0, 6672
-	jz_t :read_file_cmd
-	cmpi r0, 0077
-	jz_t :write_cmd
-	cmpi r0, 0a77
-	jz_t :write_cmd
-	movl r2, .bad_cmd
-	call_v $print
-	jump_t :ask_for_cmd
-	movl r2, .input_too_long
-	call_v $print
-	jump_t :ask_for_cmd
+	mov %r0, #0000
+	stb %r0, [#e002]
+	mov %r2, .ready
+	call $print
+	mov %r2, #e000
+	mov %r3, #0008
+	call $readstr
+	cmp %r3, #0000
+	j.z #f0dc
+	mov %r2, #e000
+	call $strtrim
+	ldb %r0, [#e002]
+	cmp %r0, #0
+	j.n #f0d3
+	ld %r0, [#e000]
+	cmp %r0, #0a68
+	j.z :help
+	cmp %r0, #0068
+	j.z :help
+	cmp %r0, #0072
+	j.z :read_cmd
+	cmp %r0, #0a72
+	j.z :read_cmd
+	cmp %r0, #0070
+	j.z :print_cmd
+	cmp %r0, #0a70
+	j.z :print_cmd
+	cmp %r0, #0078
+	j.z :exec_cmd
+	cmp %r0, #0a78
+	j.z :exec_cmd
+	cmp %r0, #0063
+	j.z :continue_cmd
+	cmp %r0,#0a63
+	j.z :continue_cmd
+	cmp %r0, #4355
+	j.z :secret_cmd
+	cmp %r0, #736c
+	j.z :ls_cmd
+	cmp %r0, #6672
+	j.z :read_file_cmd
+	cmp %r0, #0077
+	j.z :write_cmd
+	cmp %r0, #0a77
+	j.z :write_cmd
+	mov %r2, .bad_cmd
+	call $print
+	jump :ask_for_cmd
+	mov %r2, .input_too_long
+	call $print
+	jump :ask_for_cmd
 	
 :help
-	movl r2, .help
-	call_v $print
-	jump_t :ask_for_cmd
+	mov %r2, .help
+	call $print
+	jump :ask_for_cmd
 
 :read_cmd
-	movl r2, .which_addr
-	call_v $print
-	movi r2, e000
-	movi r3, 0008
-	call_v $readstr
-	movi r2, e000
-	call_v $convhex
-	cmpi r0, ffff
-	jz_t :read_cmd_invalid
-	push r0
-	movl r2, .how_many_lines
-	call_v $print
-	movi r2, e000
-	movi r3, 0008
-	call_v $readstr
-	movi r2, e000
-	call_v $convhex
-	cmpi r0, ffff
-	jz_t :read_cmd_invalid
-	cmpi r0, 0
-	jz_t :read_cmd_invalid
-	mov r3, r0
-	pop r2
+	mov %r2, .which_addr
+	call $print
+	mov %r2, #e000
+	mov %r3, #0008
+	call $readstr
+	mov %r2, #e000
+	call $convhex
+	cmp %r0, #ffff
+	j.z :read_cmd_invalid
+	push %r0
+	mov %r2, .how_many_lines
+	call $print
+	mov %r2, #e000
+	mov %r3, #0008
+	call $readstr
+	mov %r2, #e000
+	call $convhex
+	cmp %r0, #ffff
+	j.z :read_cmd_invalid
+	cmp %r0, #0
+	j.z :read_cmd_invalid
+	mov %r3, %r0
+	pop %r2
 :read_cmd_copy_print_loop
-	push r2
-	push r3
-	movi r1, 8
-	mov r3, r2
-	movi r2, fb56
-	call_v $memcpy
-	pop r3
-	pop r2
-	sti r2, [fb5e]
-	push r2
-	push r3
-	movl r2, .hex_format
-	call_v $print
-	pop r3
-	pop r2
-	addi r2, 8
-	dec r3
-	cmpi r3, 0
-	jnz_t :read_cmd_copy_print_loop
-	jump_t :ask_for_cmd
+	push %r2
+	push %r3
+	mov %r1, #8
+	mov %r3, %r2
+	mov %r2, #fb56
+	call $memcpy
+	pop %r3
+	pop %r2
+	st %r2, [#fb5e]
+	push %r2
+	push %r3
+	mov %r2, .hex_format
+	call $print
+	pop %r3
+	pop %r2
+	add %r2, #8
+	dec %r3
+	cmp %r3, #0
+	j.n :read_cmd_copy_print_loop
+	jump :ask_for_cmd
 :read_cmd_invalid
-	movl r2, .invalid_input
-	call_v $print
-	jump_t :ask_for_cmd
+	mov %r2, .invalid_input
+	call $print
+	jump :ask_for_cmd
 
 :write_cmd
-	movl r2, .which_addr
-	call_v $print
-	movi r2, e000
-	movi r3, 8
-	call_v $readstr
-	movi r2, e000
-	call_v $convhex
-	cmpi r0, ffff
-	jz_t :write_cmd_invalid_input
-	sti r0, [fb5e]
-	movl r2, .enter_data
-	call_v $print
+	mov %r2, .which_addr
+	call $print
+	mov %r2, #e000
+	mov %r3, #8
+	call $readstr
+	mov %r2, #e000
+	call $convhex
+	cmp %r0, #ffff
+	j.z :write_cmd_invalid_input
+	st %r0, [#fb5e]
+	mov %r2, .enter_data
+	call $print
 :write_cmd_D
-	movi r3, e002
-	movi r0, 0
-	stb r0, [r3]
-	dec r3
-	stb r0, [r3]
-	dec r3
+	mov %r3, #e002
+	mov %r0,#0
+	stb %r0, [%r3]
+	dec %r3
+	stb %r0, [%r3]
+	dec %r3
 :write_cmd_B
-	sys_v $sys_read
-	stb r0, [r3]
-	mov r2, r3
-	cmpi r0, 002e
-	jz_t :write_cmd_A
-	cmpi r0, 0a
-	jz_t :write_cmd_B
-	push r3
-	call_v $convhex
-	pop r3
-	cmpi r0, ffff
-	jz_t :write_cmd_B
-	inc r3
+	sys $sys_read
+	stb %r0, [%r3]
+	mov %r2, %r3
+	cmp %r0, #002e
+	j.z :write_cmd_A
+	cmp %r0, #0a
+	j.z :write_cmd_B
+	push %r3
+	call $convhex
+	pop %r3
+	cmp %r0, #ffff
+	j.z :write_cmd_B
+	inc %r3
 :write_cmd_C
-	sys_v $sys_read
-	stb r0, [r3]
-	mov r2, r3
-	cmpi r0, 002e
-	jz_t :write_cmd_A
-	cmpi r0, 0a
-	jz_t :write_cmd_C
-	push r3
-	call_v $convhex
-	pop r3
-	cmpi r0 ffff
-	jz_t :write_cmd_C
-	dec r3
-	mov r2, r3
-	call_v $convhex
-	ldi r1, [fb5e]
-	stb r0, [r1]
-	inc r1
-	sti r1, [fb5e]
-	jump_t :write_cmd_D
+	sys $sys_read
+	stb %r0, [%r3]
+	mov %r2, %r3
+	cmp %r0, #002e
+	j.z :write_cmd_A
+	cmp %r0,#0a
+	j.z :write_cmd_C
+	push %r3
+	call $convhex
+	pop %r3
+	cmp %r0 #ffff
+	j.z :write_cmd_C
+	dec %r3
+	mov %r2, %r3
+	call $convhex
+	ld %r1, [#fb5e]
+	stb %r0, [%r1]
+	inc %r1
+	st %r1, [#fb5e]
+	jump :write_cmd_D
 :write_cmd_A
-	sys_v $sys_read
-	cmpi r0, 0a
-	jnz_t :write_cmd_A
-	movl r2, .loaded
-	call_v $print
-	jump_t :ask_for_cmd
+	sys $sys_read
+	cmp %r0, #0a
+	j.n :write_cmd_A
+	mov %r2, .loaded
+	call $print
+	jump :ask_for_cmd
 :write_cmd_invalid_input
-	movl r2, .invalid_input
-	call_v $print
-	jump_t :ask_for_cmd
+	mov %r2, .invalid_input
+	call $print
+	jump :ask_for_cmd
 
 :print_cmd
-	movl r2, .which_addr
-	call_v $print
-	movi r2, e000
-	movi r3, 8
-	call_v $readstr
-	movi r2, e000
-	call_v $convhex
-	mov r2, r0
-	call_v $print
-	jump_t :ask_for_cmd
+	mov %r2, .which_addr
+	call $print
+	mov %r2, #e000
+	mov %r3, #8
+	call $readstr
+	mov %r2, #e000
+	call $convhex
+	mov %r2, %r0
+	call $print
+	jump :ask_for_cmd
 
 :exec_cmd
-	movl r2, .which_addr
-	call_v $print
-	movi r2, e000
-	movi r3, 8
-	call_v $readstr
-	movi r2, e000
-	call_v $convhex
-	push r0
-	sti r0, [fb5e]
-	movl r2, .exec_at
-	call_v $print
-	movi r2, e000
-	movi r3, 8
-	call_v $readstr
-	ldbi r0, [e000]
-	cmpi r0, 59
-	jz_t :exec_cmd_execute
-	cmpi r0, 79
-	jz_t :exec_cmd_execute
-	movl r2, .cancelled
-	call_v $print
-	pop r0
-	jump_t :ask_for_cmd
+	mov %r2, .which_addr
+	call $print
+	mov %r2, #e000
+	mov %r3, #8
+	call $readstr
+	mov %r2, #e000
+	call $convhex
+	push %r0
+	st %r0, [#fb5e]
+	mov %r2, .exec_at
+	call $print
+	mov %r2, #e000
+	mov %r3, #8
+	call $readstr
+	ldbi %r0, [#e000]
+	cmp %r0, #59
+	j.z :exec_cmd_execute
+	cmp %r0, #79
+	j.z :exec_cmd_execute
+	mov %r2, .cancelled
+	call $print
+	pop %r0
+	jump :ask_for_cmd
 :exec_cmd_execute
-	pop r3
-	callr r3
-	jump_t :ask_for_cmd
+	pop %r3
+	call %r3
+	jump :ask_for_cmd
 	
 :continue_cmd
-	movl r2, .continuing
-	call_v $print
-	ldi r0, [fb3e]
-	ldi r1, [fb40]
-	ldi r2, [fb42]
-	ldi r3, [fb44]
+	mov %r2, .continuing
+	call $print
+	ld %r0, [#fb3e]
+	ld %r1, [#fb40]
+	ld %r2, [#fb42]
+	ld %r3, [#fb44]
 	ret
 
 :ls_cmd
-	movl r2, .ls_header
-	call_v $print
-	movi r0, 0
-	movi r1, e000
-	sys_v $sys_file
-	movi r3, e000
+	mov %r2, .ls_header
+	call $print
+	mov %r0, #0
+	mov %r1, #e000
+	sys $sys_file
+	mov %r3, #e000
 :ls_cmd_loop	
-	ldb r0, [r3]
-	cmpi r0, 0000
-	jz_t :ls_cmd_out
-	push r3
-	stbi r0, [fb56]
-	inc r3
-	ld r0, [r3]
-	push r3
-	sti r0, [fb5e]
-	movl r2, .file_idx_size
-	call_v $print
-	pop r3
-	inc r3
-	inc r3
-	mov r2, r3
-	call_v $print
-	movi r0, 000a
-	sys_v $sys_write
-	pop r3
+	ldb %r0, [%r3]
+	cmp %r0, #0000
+	j.z :ls_cmd_out
+	push %r3
+	stb %r0, [#fb56]
+	inc %r3
+	ld %r0, [%r3]
+	push %r3
+	st %r0, [#fb5e]
+	mov %r2, .file_idx_size
+	call $print
+	pop %r3
+	inc %r3
+	inc %r3
+	mov %r2, %r3
+	call $print
+	mov %r0, #000a
+	sys $sys_write
+	pop %r3
 :ls_cmd_out
-	addi r3, 10
-	cmpi r3, ef00
-	jnz_t :ls_cmd_loop
-	jump_t :ask_for_cmd
+	addi %r3, #10
+	cmp %r3, #ef00
+	j.n :ls_cmd_loop
+	jump :ask_for_cmd
 
 :secret_cmd
-	movl r2, .secret
-	call_v $print
-	jump_t :ask_for_cmd
+	mov %r2, .secret
+	call $print
+	jump :ask_for_cmd
 
 :read_file_cmd
-	movl r2, .filename
-	call_v $print
-	movi r0, 0
-	movi r1, e000
-	sys_v $sys_file
-	movi r2, efb0
-	movi r3, 10
-	call_v $readstr
-	cmpi r3, 0
-	jz_t :input_too_long
-	movi r2, efb0
-	call_v $strtrim
-	movi r3, e003
+	mov %r2, .filename
+	call $print
+	mov %r0, #0
+	mov %r1, #e000
+	sys $sys_file
+	mov %r2, #efb0
+	mov %r3, #10
+	call $readstr
+	cmp %r3, #0
+	j.z :inputoo_long
+	mov %r2, #efb0
+	call $strtrim
+	mov %r3, #e003
 :read_file_cmd_B
-	movi r2, efb0
-	push r3
-	call_v $strcmp
-	pop r3
-	cmpi r0, 0
-	jz_t :read_file_cmd_A
-	addi r3, 10
-	cmpi r3, ef03
-	jz_t :file_not_found
-	jump_t :read_file_cmd_B
+	mov %r2, #efb0
+	push %r3
+	call $strcmp
+	pop %r3
+	cmp %r0, #0
+	j.z :read_file_cmd_A
+	addi %r3, #10
+	cmp %r3, #ef03
+	j.z :file_not_found
+	jump :read_file_cmd_B
 :read_file_cmd_A
-	dec r3
-	dec r3
-	dec r3
-	ldb r0, [r3]
-	inc r3
-	ld r1, [r3]
-	push r1
-	movi r1, e000
-	sys_v $sys_file
-	movl r2, .which_addr
-	call_v $print
-	movi r2, efe0
-	movi r3, 10
-	call_v $readstr
-	movi r2, efe0
-	call_v $convhex
-	pop r1
-	cmpi r0, ffff
-	jz_t :invalid_input
-	mov r2, r0
-	movi r3, e000
-	call_v $memcpy
-	movl r2, .loaded
-	call_v $print
-	jump_t :ask_for_cmd
+	dec %r3
+	dec %r3
+	dec %r3
+	ldb %r0, [%r3]
+	inc %r3
+	ld %r1, [%r3]
+	push %r1
+	mov %r1, #e000
+	sys $sys_file
+	mov %r2, .which_addr
+	call $print
+	mov %r2, #efe0
+	mov %r3, #10
+	call $readstr
+	mov %r2, #efe0
+	call $convhex
+	pop %r1
+	cmp %r0, #ffff
+	j.z :invalid_input
+	mov %r2, %r0
+	mov %r3, #e000
+	call $memcpy
+	mov %r2, .loaded
+	call $print
+	jump :ask_for_cmd
 
 :file_not_found
-	movl r2, .file_not_found
-	call_v $print
-	jump_t :ask_for_cmd
+	mov %r2, .file_not_found
+	call $print
+	jump :ask_for_cmd
 
-:input_too_long
-	movl r2, .input_too_long
-	call_v $print
-	jump_t :ask_for_cmd
+:inputoo_long
+	mov %r2, .input_too_long
+	call $print
+	jump :ask_for_cmd
 	
 :invalid_input
-	movl r2, .invalid_input
-	call_v $print
-	jump_t :ask_for_cmd
+	mov %r2, .invalid_input
+	call $print
+	jump :ask_for_cmd
 	
 .welcome_text "======================================================================
 Welcome to Glitch Research Laboratory Network: Test Server 1 (GRLTS01)

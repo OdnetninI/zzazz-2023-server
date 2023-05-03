@@ -1,0 +1,293 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <assert.h>
+
+#define _LEX_H_IMP_
+#include "lex.h"
+#include "file.h"
+
+uint32_t line = 1;
+char putback = 0;
+bool found_eof = false;
+
+char next() {
+    if (putback) {
+        char c = putback;
+        putback = 0;
+        if (c == EOF) found_eof = true;
+        return c;
+    }
+    
+    char c = fgetc(input);
+    if (c == '\n') line++;
+    if (c == EOF) found_eof = true;
+    return c;
+}
+
+void putBack(char c) {
+    putback = c;
+}
+
+char skip() {
+    char c = next();
+    while (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f') {
+        c = next();
+    }
+    if (c == EOF) found_eof = true;
+    return c;
+}
+
+void skip_until_newline() {
+    char c = next();
+    while (c != '\n' && c!= EOF) {
+        c = next();
+    }
+    if (c == EOF) found_eof = true;
+    putBack(c);
+}
+
+bool isSpacer(char c) {
+    return (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f' || c == ',' || c == EOF);
+}
+
+void identifyToken_a(Token* token) {
+    switch(token->data[1]) {
+        case 'd': token->type = T_I_add; break;
+        case 'n': token->type = T_I_and; break;
+    }
+}
+
+void identifyToken_call_(Token* token) {
+    switch(token->data[5]) {
+        case 'g': token->type = T_I_call_g; break;
+        case 'l': token->type = T_I_call_l; break;
+        case 'n': token->type = T_I_call_n; break;
+        case 'z': token->type = T_I_call_z; break;
+    }
+}
+
+void identifyToken_call(Token* token) {
+    switch(token->data[4]) {
+        case '\0': token->type = T_I_call; break;
+        case '.': identifyToken_call_(token); break;
+    }
+}
+
+void identifyToken_c(Token* token) {
+    switch(token->data[1]) {
+        case 'a': identifyToken_call(token); break;
+        case 'm': token->type = T_I_cmp; break;
+    }
+}
+
+void identifyToken_d(Token* token) {
+    switch(token->data[1]) {
+        case 'e': token->type = T_I_dec; break;
+        case 'i': token->type = T_I_div; break;
+    }
+}
+
+void identifyToken_j_(Token* token) {
+    switch(token->data[2]) {
+        case 'g': token->type = T_I_j_g; break;
+        case 'l': token->type = T_I_j_l; break;
+        case 'z': token->type = T_I_j_z; break;
+        case 'n': token->type = T_I_j_n; break;
+    }
+}
+
+void identifyToken_j(Token* token) {
+    switch(token->data[1]) {
+        case '.': identifyToken_j_(token); break;
+        case 'u': token->type = T_I_jump; break;
+    }
+}
+
+void identifyToken_ld(Token* token) {
+    switch(token->data[2]) {
+        case '\0': token->type = T_I_ld; break;
+        case 'b': token->type = T_I_ldb; break;
+    }
+}
+
+void identifyToken_l(Token* token) {
+    switch(token->data[1]) {
+        case 'd': identifyToken_ld(token); break;
+        case 'l': token->type = T_I_lls; break;
+    }
+}
+
+void identifyToken_m(Token* token) {
+    switch(token->data[1]) {
+        case 'o': token->type = T_I_mov; break;
+        case 'u': token->type = T_I_mul; break;
+    }
+}
+
+void identifyToken_nop(Token* token) {
+    switch(token->data[3]) {
+        case '\0': token->type = T_I_nop; break;
+        case 'c': token->type = T_I_nopc; break;
+    }
+}
+
+void identifyToken_p(Token* token) {
+    switch(token->data[1]) {
+        case 'o': token->type = T_I_pop; break;
+        case 'u': token->type = T_I_push; break;
+    }
+}
+
+void identifyToken_r(Token* token) {
+    switch(token->data[1]) {
+        case 'e': token->type = T_I_ret; break;
+        case 'l': token->type = T_I_rls; break;
+    }
+}
+
+void identifyToken_st(Token* token) {
+    switch(token->data[2]) {
+        case '\0': token->type = T_I_st; break;
+        case 'b': token->type = T_I_stb; break;
+    }
+}
+
+void identifyToken_s(Token* token) {
+    switch(token->data[1]) {
+        case 't': identifyToken_st(token); break;
+        case 'y': token->type = T_I_sys; break;
+        case 'w': token->type = T_I_swap; break;
+    }
+}
+
+void identifyToken(Token* token) {
+    assert(token->data);
+    token->type = T_Unknown;
+
+    switch(token->data[0]) {
+        case '.': token->type = T_TextID;   break;
+        case '"': token->type = T_TextData; break;
+        case ':': token->type = T_Label;    break;
+        case '$': token->type = T_Define;   break;
+        case '#': token->type = T_Num;      break;
+        case '%': token->type = T_Register; break;
+        case '[': token->type = T_LSquareBracket; break;
+        case ']': token->type = T_RSquareBracket; break;
+
+        case 'a': identifyToken_a(token); break;
+        case 'b': token->type = T_I_break; break;
+        case 'c': identifyToken_c(token); break;
+        case 'd': identifyToken_d(token); break;
+        case 'e': token->type = T_entry; break;
+
+        case 'i': token->type = T_I_inc; break;
+        case 'j': identifyToken_j(token); break;
+        case 'l': identifyToken_l(token); break;
+        case 'm': identifyToken_m(token); break;
+        case 'n': identifyToken_nop(token); break;
+
+        case 'o': token->type = T_I_or; break;
+        case 'p': identifyToken_p(token); break;
+
+        case 'r': identifyToken_r(token); break;
+        case 's': identifyToken_s(token); break;
+
+        case 'x': token->type = T_I_xor; break;
+
+        case 'z': token->type = T_I_zzazz; break;
+    }
+}
+
+void nextToken(Token* token) {
+    if (found_eof) {
+        token->type = T_EOF;
+        token->line = line;
+        token->data = NULL;
+        return;
+    }
+
+    char data[4096] = {0};
+    char c = EOF;
+    char found_str = false;
+    putBack(skip());
+    int i;
+    for(i = 0; ;++i) {
+        c = next();       
+
+        if (found_str) {
+            if (c == '"') {
+                data[i] = c;
+                data[i+1] = 0x00;
+                break;
+            }
+
+            if (c == '\\') {
+                c = next();
+                if (c == 'n') c = '\n';
+                if (c == '\\') c = '\\';
+                if (c == '"') c = '"';
+                if (c == 'x') {
+                    char hex[3];
+                    hex[0] = next();
+                    hex[1] = next();
+                    hex[2] = 0x00;
+                    c = (char)strtol(hex, NULL, 16);
+                }
+            }
+
+            data[i] = c;
+            continue;
+        }
+
+        if (c == EOF || found_eof) {
+            token->type = T_EOF;
+            token->line = line;
+            token->data = NULL;
+            return;
+        }
+
+        if (c == '"') {
+            found_str = true;
+        }
+
+        if (c == ';') {
+            skip_until_newline();
+            continue;
+        }
+
+        if (i == 0 && (c == '[' || c == ']')) {
+            data[i] = c;
+            data[i+1] = 0x00;
+            break;
+        }
+
+        if (c == ']') {
+            data[i] = 0x00;
+            putBack(c);
+            break;
+        }
+        
+        if (isSpacer(c)) {
+            data[i] = 0x00;
+
+            // If empty token, just restart again
+            if (data[0] == 0x00) {
+                i = -1;
+                continue;
+            }
+
+            break;
+        }
+
+        data[i] = c;
+    }
+
+    token->line = line;
+    token->data_size = i;
+    token->data = malloc(i);
+    for (int j = 0; j <= i; ++j) token->data[j] = data[j];
+    identifyToken(token);
+}
