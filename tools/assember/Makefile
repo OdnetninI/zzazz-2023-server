@@ -3,7 +3,7 @@ CC=gcc
 LD=gcc
 
 # Flags
-CFLAGS=-O0 -g -Wall -Wno-tautological-compare
+CFLAGS=-O2 -Wall -Wno-tautological-compare
 LDFLAGS=
 
 # Tools

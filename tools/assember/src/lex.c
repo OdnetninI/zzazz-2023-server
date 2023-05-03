@@ -287,7 +287,7 @@ void nextToken(Token* token) {
 
     token->line = line;
     token->data_size = i;
-    token->data = malloc(i);
+    token->data = malloc(i+1);
     for (int j = 0; j <= i; ++j) token->data[j] = data[j];
     identifyToken(token);
 }
