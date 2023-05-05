@@ -21,4 +21,8 @@ void reserve_text(uint16_t eoc);
 uint16_t find_text(const char* id);
 void dump_text();
 
+void add_implace(uint16_t pc, const char* text, int size);
+uint16_t get_implace_size_up_to(uint16_t pc);
+uint16_t find_dump_implace(uint16_t pc);
+
 #endif /* __SYMS_H__ */

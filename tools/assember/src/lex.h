@@ -16,6 +16,7 @@
     State(T_entry)                     \
     State(T_LSquareBracket)            \
     State(T_RSquareBracket)            \
+    State(T_Implace)                   \
     \
     /* Expressions */ \
     State(T_LParenthesis)              \

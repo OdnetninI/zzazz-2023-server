@@ -643,6 +643,7 @@ void calculate_end_of_code() {
         end_of_code += node->inst_size;
         node = node->next;
     }
+    end_of_code += get_implace_size_up_to(end_of_code);
 }
 
 uint16_t calculate_current_pos_code() {
@@ -652,6 +653,7 @@ uint16_t calculate_current_pos_code() {
         pc += node->inst_size;
         node = node->next;
     }
+    pc += get_implace_size_up_to(0xffff);
     return pc;
 }
 
@@ -659,9 +661,21 @@ void dump_code() {
     calculate_end_of_code();
     reserve_text(end_of_code);
 
+    uint16_t pc = entry_point;
+
     Instruction* node = &instructions;
     while(node->instruction != T_Unknown) {
-        
+
+        //printf("PC-> %04x\n", pc);
+
+        uint16_t size = 0;
+        do {
+            size = find_dump_implace(pc);
+            pc += size;
+        } while(size != 0);
+
+        pc += node->inst_size;
+
         fwrite(&(node->opcode), 1, 1 , output);
 
         if(node->label || node->define || node->text || node->imm || node->expression.type == T_expression) {
@@ -710,6 +724,11 @@ void dump_code() {
         }
 
         node = node->next;
+    }
+
+    printf("Dumping remaining implaces\n");
+    for (uint16_t i = pc; i < 0xffff; ++i) {
+        i += find_dump_implace(i);
     }
 
     printf("Code %04x -> %04x\n", entry_point, end_of_code);

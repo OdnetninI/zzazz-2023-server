@@ -70,6 +70,10 @@ void parse_label(Token* main) {
     add_label(main->data, calculate_current_pos_code());
 }
 
+void parse_implace(Token* main) {
+    //printf("Implace %s\n", main->data);
+    add_implace(calculate_current_pos_code(), main->data, main->data_size);
+}
 
 void parse_0_arg(Token* main) {
     //printf("%s\n", main->data);
@@ -223,6 +227,7 @@ void parse() {
             case T_Define: parse_define(&token); break;
             case T_TextID: parse_text(&token); break;
             case T_Label:  parse_label(&token); break;
+            case T_Implace: parse_implace(&token); break;
             
             // Instructions
             case T_I_illegal:
@@ -232,6 +237,7 @@ void parse() {
             case T_I_zzazz:
             case T_I_break: parse_0_arg(&token); break;
 
+            case T_I_swap:
             case T_I_lls:
             case T_I_rls:
             case T_I_inc:

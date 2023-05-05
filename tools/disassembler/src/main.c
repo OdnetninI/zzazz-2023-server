@@ -106,7 +106,7 @@ int main(int argc, char* argv[]) {
                 case 0x08: write_inst("nop");                 break;
                 case 0x09: write_inst_arg_imm("mov %sp");         break;
                 case 0x0a: write_inst("mov %r0, %sp");        break;
-                case 0x0b: write_inst("div %r1, %sp");        break;
+                case 0x0b: write_inst("mov %r1, %sp");        break;
                 case 0x0c: write_inst("nopc");                break;
                 case 0x0d: write_inst("illegal");             break;
                 case 0x0e: write_inst("lls %r0");             break;

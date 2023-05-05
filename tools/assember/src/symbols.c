@@ -110,3 +110,55 @@ void dump_text() {
         node = node->next;
     }
 }
+
+struct implaces {
+    uint16_t pc;
+    char* text;
+    int size;
+    struct implaces* next;
+};
+struct implaces implaces = { .pc = 0x0000, .text = NULL, .next = NULL };
+
+void add_implace(uint16_t pc, const char* text, int size) {
+    struct implaces* node = &implaces;
+    while(node->text != NULL) node = node->next;
+    
+    node->text = malloc(size-1);
+    node->pc = pc;
+    node->size = size - 1;
+    node->next = malloc(sizeof(struct implaces));
+    node->next->text = NULL;
+
+    for (int i = 0; i < size-1; ++i) node->text[i] = text[i+1];
+
+    //printf("Implace %.*s at position %04x\n", node->size, node->text, node->pc);
+    printf("Implace at position %04x, size %d\n", node->pc, node->size);
+}
+
+uint16_t get_implace_size_up_to(uint16_t pc) {
+    uint16_t size = 0;
+    struct implaces* node = &implaces;
+    //printf("Starting looking at %04x\n", pc);
+    while(node->text != NULL) {
+        if (node->pc <= pc) {
+            //printf("Adding %04x to %04x\n", node->size, pc+size);
+            size += node->size;
+        }
+        node = node->next;
+    }
+    //printf("Ended looking at %04x\n", pc + size);
+    return size;
+}
+
+uint16_t find_dump_implace(uint16_t pc) {
+    struct implaces* node = &implaces;
+    while(node->text != NULL && node->pc < pc) { node = node->next; }
+
+    if (node->text == NULL) return 0;
+    if (pc != node->pc) return 0;
+
+    printf("Dumping implace at position %04x\n", node->pc);
+
+    fwrite(node->text, 1, node->size, output);
+    return node->size;
+}

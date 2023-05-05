@@ -186,6 +186,7 @@ void identifyToken(Token* token) {
         case ']': token->type = T_RSquareBracket; break;
         case '(': token->type = T_LParenthesis; break;
         case ')': token->type = T_RParenthesis; break;
+        case '&': token->type = T_Implace; break;
         case '+': token->type = T_add; break;
         case '-': token->type = T_sub; break;
 
@@ -225,10 +226,37 @@ void nextToken(Token* token) {
     char c = EOF;
     bool found_str = false;
     bool found_chars = false;
+    bool found_implace = false;
     putBack(skip());
     int i;
     for(i = 0; ;++i) {
         c = next();   
+
+        if (found_implace) {
+            if (c == '&') {
+                data[i] = c;
+                data[i+1] = 0x00;
+                break;
+            }
+
+            if (c == '\\') {
+                c = next();
+                if (c == 'n') c = '\n';
+                if (c == '\\') c = '\\';
+                if (c == '"') c = '"';
+                if (c == '&') c = '&';
+                if (c == 'x') {
+                    char hex[3];
+                    hex[0] = next();
+                    hex[1] = next();
+                    hex[2] = 0x00;
+                    c = (char)strtol(hex, NULL, 16);
+                }
+            }
+
+            data[i] = c;
+            continue;
+        }
 
         if (found_chars) {
             if (c == '\'') {
@@ -285,6 +313,10 @@ void nextToken(Token* token) {
             token->line = line;
             token->data = NULL;
             return;
+        }
+
+        if (c == '&') {
+            found_implace = true;
         }
 
         if (c == '\'') {
