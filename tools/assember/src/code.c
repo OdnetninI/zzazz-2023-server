@@ -558,6 +558,7 @@ void calculate_opcode_and_size(Instruction* node) {
         case T_I_nop:   node->opcode = 0x08; node->inst_size = 1; return;
         case T_I_nopc:  node->opcode = 0x0c; node->inst_size = 1; return;
         case T_I_zzazz: node->opcode = 0x07; node->inst_size = 1; return;
+        case T_I_illegal: node->opcode = 0xff; node->inst_size = 1; return;
 
         case T_I_j_l: node->opcode = 0x9a; node->inst_size = 3; return;
         case T_I_j_g: node->opcode = 0x9b; node->inst_size = 3; return;

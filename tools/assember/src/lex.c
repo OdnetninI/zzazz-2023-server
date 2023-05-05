@@ -90,6 +90,13 @@ void identifyToken_d(Token* token) {
     }
 }
 
+void identifyToken_i(Token* token) {
+    switch(token->data[1]) {
+        case 'l': token->type = T_I_illegal; break;
+        case 'n': token->type = T_I_inc; break;
+    }
+}
+
 void identifyToken_j_(Token* token) {
     switch(token->data[2]) {
         case 'g': token->type = T_I_j_g; break;
@@ -188,7 +195,7 @@ void identifyToken(Token* token) {
         case 'd': identifyToken_d(token); break;
         case 'e': token->type = T_entry; break;
 
-        case 'i': token->type = T_I_inc; break;
+        case 'i': identifyToken_i(token); break;
         case 'j': identifyToken_j(token); break;
         case 'l': identifyToken_l(token); break;
         case 'm': identifyToken_m(token); break;

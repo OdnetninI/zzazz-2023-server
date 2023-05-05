@@ -40,6 +40,7 @@
     State(T_I_dec)                     \
     State(T_I_div)                     \
     \
+    State(T_I_illegal)                 \
     State(T_I_inc)                     \
     \
     State(T_I_j_g)                     \

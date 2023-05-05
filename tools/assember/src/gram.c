@@ -225,6 +225,7 @@ void parse() {
             case T_Label:  parse_label(&token); break;
             
             // Instructions
+            case T_I_illegal:
             case T_I_ret:
             case T_I_nop:
             case T_I_nopc:
