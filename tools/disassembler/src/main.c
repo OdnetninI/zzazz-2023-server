@@ -21,6 +21,12 @@ void write_inst_imm(const char* inst) {
     pc += 2;
 }
 
+void write_inst_arg_imm(const char* inst) {
+    uint16_t imm = ((uint16_t)fgetc(input)) | (((uint16_t)fgetc(input)) << 8);
+    fprintf(output, "%s, #%04x", inst, imm);
+    pc += 2;
+}
+
 void write_inst_imm_addr(const char* inst) {
     uint16_t imm = ((uint16_t)fgetc(input)) | (((uint16_t)fgetc(input)) << 8);
     fprintf(output, "%s, [#%04x]", inst, imm);
@@ -90,15 +96,15 @@ int main(int argc, char* argv[]) {
 
             switch(opcode) {
                 case 0x00: write_inst("break");               break;
-                case 0x01: write_inst_imm("mul %r0");         break;
+                case 0x01: write_inst_arg_imm("mul %r0");         break;
                 case 0x02: write_inst("mul %r0, %r1");        break;
-                case 0x03: write_inst_imm("div %r0");         break;
+                case 0x03: write_inst_arg_imm("div %r0");         break;
                 case 0x04: write_inst("div %r0, %r1");        break;
                 case 0x05: write_inst("ret");                 break;
                 case 0x06: write_sys();                       break;
                 case 0x07: write_inst("zzazz");               break;
                 case 0x08: write_inst("nop");                 break;
-                case 0x09: write_inst_imm("mov %sp");         break;
+                case 0x09: write_inst_arg_imm("mov %sp");         break;
                 case 0x0a: write_inst("mov %r0, %sp");        break;
                 case 0x0b: write_inst("div %r1, %sp");        break;
                 case 0x0c: write_inst("nopc");                break;
@@ -106,10 +112,10 @@ int main(int argc, char* argv[]) {
                 case 0x0e: write_inst("lls %r0");             break;
                 case 0x0f: write_inst("rls %r0");             break;
 
-                case 0x10: write_inst_imm("mov %r0");         break;
-                case 0x11: write_inst_imm("mov %r1");         break;
-                case 0x12: write_inst_imm("mov %r2");         break;
-                case 0x13: write_inst_imm("mov %r3");         break;
+                case 0x10: write_inst_arg_imm("mov %r0");         break;
+                case 0x11: write_inst_arg_imm("mov %r1");         break;
+                case 0x12: write_inst_arg_imm("mov %r2");         break;
+                case 0x13: write_inst_arg_imm("mov %r3");         break;
                 case 0x14 ... 0x1f: 
                     write_inst("illegal");
                     break;
@@ -161,10 +167,10 @@ int main(int argc, char* argv[]) {
 
                 case 0xa0: write_inst_imm("call.z");         break;
                 case 0xa1: write_inst_imm("call.n");         break;
-                case 0xa2: write_inst_imm("cmp %r0");         break;
-                case 0xa3: write_inst_imm("cmp %r1");         break;
-                case 0xa4: write_inst_imm("cmp %r2");         break;
-                case 0xa5: write_inst_imm("cmp %r3");         break;
+                case 0xa2: write_inst_arg_imm("cmp %r0");         break;
+                case 0xa3: write_inst_arg_imm("cmp %r1");         break;
+                case 0xa4: write_inst_arg_imm("cmp %r2");         break;
+                case 0xa5: write_inst_arg_imm("cmp %r3");         break;
                 case 0xa6: write_inst("push %sp");         break;
                 case 0xa7: write_inst("push %pc");         break;
                 case 0xa8: write_inst("inc %r0");         break;
@@ -204,9 +210,9 @@ int main(int argc, char* argv[]) {
                 case 0xca: write_inst("call %r1"); break;
                 case 0xcb: write_inst("call %r2"); break;
                 case 0xcc: write_inst("call %r3"); break;
-                case 0xcd: write_inst_imm("and %r0");         break;
-                case 0xce: write_inst_imm("or %r0");         break;
-                case 0xcf: write_inst_imm("xor %r0");         break;
+                case 0xcd: write_inst_arg_imm("and %r0");         break;
+                case 0xce: write_inst_arg_imm("or %r0");         break;
+                case 0xcf: write_inst_arg_imm("xor %r0");         break;
 
                 case 0xd0: write_inst("and %r0, %r1"); break;
                 case 0xd1: write_inst("and %r0, %r1"); break;
@@ -224,10 +230,10 @@ int main(int argc, char* argv[]) {
                     write_inst("swap %r0"); 
                     break;
 
-                case 0xe0: write_inst_imm("add %r0");         break;
-                case 0xe1: write_inst_imm("add %r1");         break;
-                case 0xe2: write_inst_imm("add %r2");         break;
-                case 0xe3: write_inst_imm("add %r3");         break;
+                case 0xe0: write_inst_arg_imm("add %r0");         break;
+                case 0xe1: write_inst_arg_imm("add %r1");         break;
+                case 0xe2: write_inst_arg_imm("add %r2");         break;
+                case 0xe3: write_inst_arg_imm("add %r3");         break;
                 case 0xe4 ... 0xff: 
                     write_inst("illegal");
                     break;
