@@ -17,7 +17,7 @@ void write_inst(const char* inst) {
 
 void write_inst_imm(const char* inst) {
     uint16_t imm = ((uint16_t)fgetc(input)) | (((uint16_t)fgetc(input)) << 8);
-    fprintf(output, "%s, #%04x", inst, imm);
+    fprintf(output, "%s #%04x", inst, imm);
     pc += 2;
 }
 
