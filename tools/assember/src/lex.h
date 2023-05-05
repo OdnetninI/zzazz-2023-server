@@ -7,6 +7,7 @@
     State(T_Unknown)                   \
     State(T_EOF)                       \
     State(T_TextID)                    \
+    State(T_Chars)                    \
     State(T_TextData)                  \
     State(T_Label)                     \
     State(T_Define)                    \
@@ -15,6 +16,13 @@
     State(T_entry)                     \
     State(T_LSquareBracket)            \
     State(T_RSquareBracket)            \
+    \
+    /* Expressions */ \
+    State(T_LParenthesis)              \
+    State(T_RParenthesis)              \
+    State(T_expression)                \
+    State(T_add)                       \
+    State(T_sub)                       \
     \
     /* Instructions */ \
     State(T_I_add)                     \
@@ -94,6 +102,11 @@ typedef struct Token {
     char* data;
     uint32_t data_size;
     uint32_t line;
+
+    // Only for expressions
+    struct Token* a;
+    struct Token* op;
+    struct Token* b;
 } Token;
 
 void nextToken(Token* token);

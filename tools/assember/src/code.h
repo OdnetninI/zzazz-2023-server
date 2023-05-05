@@ -10,6 +10,8 @@
 #include <stdbool.h>
 #include <assert.h>
 
+#include "lex.h"
+
 typedef struct Instruction {
     int instruction;
     uint8_t opcode;
@@ -20,11 +22,12 @@ typedef struct Instruction {
     char* text;
     char* define;
     char* imm;
+    Token expression;
     struct Instruction* next;
 } Instruction;
 
 void setEntryPoint(uint16_t ep);
-void addInstruction(int inst, uint16_t reg, uint16_t regm, char* label, char* text, char* define, char* imm);
+void addInstruction(int inst, uint16_t reg, uint16_t regm, char* label, char* text, char* define, char* imm, Token token);
 uint16_t calculate_current_pos_code();
 
 void dump_code();

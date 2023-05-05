@@ -170,12 +170,17 @@ void identifyToken(Token* token) {
     switch(token->data[0]) {
         case '.': token->type = T_TextID;   break;
         case '"': token->type = T_TextData; break;
+        case '\'': token->type = T_Chars; break;
         case ':': token->type = T_Label;    break;
         case '$': token->type = T_Define;   break;
         case '#': token->type = T_Num;      break;
         case '%': token->type = T_Register; break;
         case '[': token->type = T_LSquareBracket; break;
         case ']': token->type = T_RSquareBracket; break;
+        case '(': token->type = T_LParenthesis; break;
+        case ')': token->type = T_RParenthesis; break;
+        case '+': token->type = T_add; break;
+        case '-': token->type = T_sub; break;
 
         case 'a': identifyToken_a(token); break;
         case 'b': token->type = T_I_break; break;
@@ -211,11 +216,37 @@ void nextToken(Token* token) {
 
     char data[4096] = {0};
     char c = EOF;
-    char found_str = false;
+    bool found_str = false;
+    bool found_chars = false;
     putBack(skip());
     int i;
     for(i = 0; ;++i) {
-        c = next();       
+        c = next();   
+
+        if (found_chars) {
+            if (c == '\'') {
+                data[i] = c;
+                data[i+1] = 0x00;
+                break;
+            }
+
+            if (c == '\\') {
+                c = next();
+                if (c == 'n') c = '\n';
+                if (c == '\\') c = '\\';
+                if (c == '"') c = '"';
+                if (c == 'x') {
+                    char hex[3];
+                    hex[0] = next();
+                    hex[1] = next();
+                    hex[2] = 0x00;
+                    c = (char)strtol(hex, NULL, 16);
+                }
+            }
+
+            data[i] = c;
+            continue;
+        }    
 
         if (found_str) {
             if (c == '"') {
@@ -249,6 +280,10 @@ void nextToken(Token* token) {
             return;
         }
 
+        if (c == '\'') {
+            found_chars = true;
+        }
+
         if (c == '"') {
             found_str = true;
         }
@@ -256,6 +291,18 @@ void nextToken(Token* token) {
         if (c == ';') {
             skip_until_newline();
             continue;
+        }
+
+        if (i == 0 && (c == '(' || c == ')')) {
+            data[i] = c;
+            data[i+1] = 0x00;
+            break;
+        }
+
+        if (c == ')') {
+            data[i] = 0x00;
+            putBack(c);
+            break;
         }
 
         if (i == 0 && (c == '[' || c == ']')) {
@@ -288,6 +335,43 @@ void nextToken(Token* token) {
     token->line = line;
     token->data_size = i;
     token->data = malloc(i+1);
+    token->a = NULL;
+    token->op = NULL;
+    token->b = NULL;
+
     for (int j = 0; j <= i; ++j) token->data[j] = data[j];
     identifyToken(token);
+
+    if (token->type == T_LParenthesis) {
+        token->type = T_expression;
+
+        Token* a = malloc(sizeof(Token));
+        Token* op = malloc(sizeof(Token));
+        Token* b = malloc(sizeof(Token));
+        nextToken(a);
+        nextToken(op);
+        nextToken(b);
+        Token close_exp;
+        nextToken(&close_exp);
+        assert(close_exp.type == T_RParenthesis);
+
+        token->a = a;
+        token->op = op;
+        token->b = b;
+
+        printf("Found expression: %s %s %s\n", a->data, op->data, b->data);
+    }
+
+    if (token->type == T_Chars) {
+        char* data = malloc(6);
+        switch(i) {
+            case 2: sprintf(data, "#%04x", token->data[1]); break;
+            case 3: sprintf(data, "#%02x%02x", token->data[2], token->data[1]); break;
+            default: assert(false);
+        }
+        token->type = T_Num;
+        free(token->data);
+        token->data = data;
+        token->data_size = 6;
+    }
 }

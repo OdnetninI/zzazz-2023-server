@@ -73,7 +73,8 @@ void parse_label(Token* main) {
 
 void parse_0_arg(Token* main) {
     //printf("%s\n", main->data);
-    addInstruction(main->type, R_Unknown, R_Unknown, NULL, NULL, NULL, NULL);
+    Token token = {.type = T_Unknown};
+    addInstruction(main->type, R_Unknown, R_Unknown, NULL, NULL, NULL, NULL, token);
 }
 
 void parse_arg(Token* main) {
@@ -82,26 +83,31 @@ void parse_arg(Token* main) {
     switch(t_data.type) {
         case T_Label:
             //printf("%s %s\n", main->data, t_data.data);
-            addInstruction(main->type, R_Unknown, R_Unknown, t_data.data, NULL, NULL, NULL);
+            addInstruction(main->type, R_Unknown, R_Unknown, t_data.data, NULL, NULL, NULL, t_data);
             break;
         case T_TextID:
             //printf("%s %s\n", main->data, t_data.data);
-            addInstruction(main->type, R_Unknown, R_Unknown, NULL, t_data.data, NULL, NULL);
+            addInstruction(main->type, R_Unknown, R_Unknown, NULL, t_data.data, NULL, NULL, t_data);
             break;
         case T_Define:
             //printf("%s %s\n", main->data, t_data.data);
-            addInstruction(main->type, R_Unknown, R_Unknown, NULL, NULL, t_data.data, NULL);
+            addInstruction(main->type, R_Unknown, R_Unknown, NULL, NULL, t_data.data, NULL, t_data);
             break;
         case T_Num:
             //uint16_t value = decode_hex(t_data.data);
             //printf("%s %04x\n", main->data, value);
-            addInstruction(main->type, R_Unknown, R_Unknown, NULL, NULL, NULL, t_data.data);
+            addInstruction(main->type, R_Unknown, R_Unknown, NULL, NULL, NULL, t_data.data, t_data);
             break;
         case T_Register:
             uint16_t reg = decode_reg(t_data.data);
             //printf("%s %d\n", main->data, reg);
-            addInstruction(main->type, reg, R_Unknown, NULL, NULL, NULL, NULL);
+            addInstruction(main->type, reg, R_Unknown, NULL, NULL, NULL, NULL, t_data);
             break;
+        case T_expression:
+            //printf("%s %s\n", main->data, t_data.data);
+            addInstruction(main->type, R_Unknown, R_Unknown, NULL, NULL, NULL, NULL, t_data);
+            break;
+        default: assert(false);
     }
     free(t_data.data);
 }
@@ -118,26 +124,31 @@ void parse_2_args(Token* main) {
     switch(t_data.type) {
         case T_Label:
             //printf("%s %d, LABEL %s\n", main->data, reg, t_data.data);
-            addInstruction(main->type, reg, R_Unknown, t_data.data, NULL, NULL, NULL);
+            addInstruction(main->type, reg, R_Unknown, t_data.data, NULL, NULL, NULL, t_data);
             break;
         case T_TextID:
             //printf("%s %d, TEXT %s\n", main->data, reg, t_data.data);
-            addInstruction(main->type, reg, R_Unknown, NULL, t_data.data, NULL, NULL);
+            addInstruction(main->type, reg, R_Unknown, NULL, t_data.data, NULL, NULL, t_data);
             break;
         case T_Define:
             //printf("%s %d, DEFINE %s\n", main->data, reg, t_data.data);
-            addInstruction(main->type, reg, R_Unknown, NULL, NULL, t_data.data, NULL);
+            addInstruction(main->type, reg, R_Unknown, NULL, NULL, t_data.data, NULL, t_data);
             break;
         case T_Num:
             //uint16_t value = decode_hex(t_data.data);
             //printf("%s %d, %04x\n", main->data, reg, value);
-            addInstruction(main->type, reg, R_Unknown, NULL, NULL, NULL, t_data.data);
+            addInstruction(main->type, reg, R_Unknown, NULL, NULL, NULL, t_data.data, t_data);
             break;
         case T_Register:
             uint16_t reg2 = decode_reg(t_data.data);
             //printf("%s %d, %d\n", main->data, reg, reg2);
-            addInstruction(main->type, reg, reg2, NULL, NULL, NULL, NULL);
+            addInstruction(main->type, reg, reg2, NULL, NULL, NULL, NULL, t_data);
             break;
+        case T_expression:
+            //printf("%s %d, LABEL %s\n", main->data, reg, t_data.data);
+            addInstruction(main->type, reg, R_Unknown, NULL, NULL, NULL, NULL, t_data);
+            break;
+        default: assert(false);
     }
     free(t_reg.data);
     free(t_data.data);
@@ -165,26 +176,31 @@ void parse_2_args_addr(Token* main) {
     switch(t_data.type) {
         case T_TextID:
             //printf("%s %d, [%s]\n", main->data, reg, t_data.data);
-            addInstruction(main->type, reg, R_Unknown, t_data.data, NULL, NULL, NULL);
+            addInstruction(main->type, reg, R_Unknown, t_data.data, NULL, NULL, NULL, t_data);
             break;
         case T_Label:
             //printf("%s %d, [%s]\n", main->data, reg, t_data.data);
-            addInstruction(main->type, reg, R_Unknown, NULL, t_data.data, NULL, NULL);
+            addInstruction(main->type, reg, R_Unknown, NULL, t_data.data, NULL, NULL, t_data);
             break;
         case T_Define:
             //printf("%s %d, [%s]\n", main->data, reg, t_data.data);
-            addInstruction(main->type, reg, R_Unknown, NULL, NULL, t_data.data, NULL);
+            addInstruction(main->type, reg, R_Unknown, NULL, NULL, t_data.data, NULL, t_data);
             break;
         case T_Num:
             //uint16_t value = decode_hex(t_data.data);
             //printf("%s %d, [%04x]\n", main->data, reg, value);
-            addInstruction(main->type, reg, R_Unknown, NULL, NULL, NULL, t_data.data);
+            addInstruction(main->type, reg, R_Unknown, NULL, NULL, NULL, t_data.data, t_data);
             break;
         case T_Register:
             uint16_t reg2 = decode_reg(t_data.data);
             //printf("%s %d, [%d]\n", main->data, reg, reg2);
-            addInstruction(main->type, reg, reg2, NULL, NULL, NULL, NULL);
+            addInstruction(main->type, reg, reg2, NULL, NULL, NULL, NULL, t_data);
             break;
+        case T_expression:
+            //printf("%s %d, [%s]\n", main->data, reg, t_data.data);
+            addInstruction(main->type, reg, R_Unknown, NULL, NULL, NULL, NULL, t_data);
+            break;
+        default: assert(false);
     }
 
     free(t_reg.data);

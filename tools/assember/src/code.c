@@ -29,7 +29,7 @@ void calculate_opcode_and_size_jump(Instruction* node) {
         case R2: node->opcode = 0xc7; node->inst_size = 1; return;
         case R3: node->opcode = 0xc8; node->inst_size = 1; return;
         case R_Unknown:
-            if (node->label || node->text || node->define || node->imm) {
+            if (node->label || node->text || node->define || node->imm || node->expression.type == T_expression) {
                 node->opcode = 0x98; node->inst_size = 3; return;
             }
             else { assert(false); }
@@ -43,7 +43,7 @@ void calculate_opcode_and_size_call(Instruction* node) {
         case R2: node->opcode = 0xcb; node->inst_size = 1; return;
         case R3: node->opcode = 0xcc; node->inst_size = 1; return;
         case R_Unknown:
-            if (node->label || node->text || node->define || node->imm) {
+            if (node->label || node->text || node->define || node->imm || node->expression.type == T_expression) {
                 node->opcode = 0x99; node->inst_size = 3; return;
             }
             else { assert(false); }
@@ -89,7 +89,7 @@ void calculate_opcode_and_size_cmp(Instruction* node) {
             } 
             return;
         case R_Unknown: 
-            if (node->label || node->text || node->define || node->imm) {
+            if (node->label || node->text || node->define || node->imm || node->expression.type == T_expression) {
                 switch(node->reg) {
                     case R0: node->opcode = 0xa2; node->inst_size = 3; return;
                     case R1: node->opcode = 0xa3; node->inst_size = 3; return;
@@ -112,7 +112,7 @@ void calculate_opcode_and_size_and(Instruction* node) {
                 case R2: node->opcode = 0xd2; node->inst_size = 1; return;
                 case R3: node->opcode = 0xd3; node->inst_size = 1; return;
                 case R_Unknown:
-                    if (node->label || node->text || node->define || node->imm) {
+                    if (node->label || node->text || node->define || node->imm || node->expression.type == T_expression) {
                         node->opcode = 0xcd; node->inst_size = 3; return;
                     }
                     else { assert(false); }
@@ -129,7 +129,7 @@ void calculate_opcode_and_size_or(Instruction* node) {
                 case R2: node->opcode = 0xd6; node->inst_size = 1; return;
                 case R3: node->opcode = 0xd7; node->inst_size = 1; return;
                 case R_Unknown:
-                    if (node->label || node->text || node->define || node->imm) {
+                    if (node->label || node->text || node->define || node->imm || node->expression.type == T_expression) {
                         node->opcode = 0xce; node->inst_size = 3; return;
                     }
                     else { assert(false); }
@@ -146,7 +146,7 @@ void calculate_opcode_and_size_xor(Instruction* node) {
                 case R2: node->opcode = 0xda; node->inst_size = 1; return;
                 case R3: node->opcode = 0xdb; node->inst_size = 1; return;
                 case R_Unknown:
-                    if (node->label || node->text || node->define || node->imm) {
+                    if (node->label || node->text || node->define || node->imm || node->expression.type == T_expression) {
                         node->opcode = 0xcf; node->inst_size = 3; return;
                     }
                     else { assert(false); }
@@ -179,7 +179,7 @@ void calculate_opcode_and_size_mul(Instruction* node) {
         case R0: 
             switch (node->regm) {
                 case R_Unknown:
-                    if (node->label || node->text || node->define || node->imm) {
+                    if (node->label || node->text || node->define || node->imm || node->expression.type == T_expression) {
                         node->opcode = 0x01; node->inst_size = 3;
                     }
                     else { assert(false); }
@@ -195,7 +195,7 @@ void calculate_opcode_and_size_div(Instruction* node) {
         case R0: 
             switch (node->regm) {
                 case R_Unknown:
-                    if (node->label || node->text || node->define || node->imm) {
+                    if (node->label || node->text || node->define || node->imm || node->expression.type == T_expression) {
                         node->opcode = 0x03; node->inst_size = 3;
                     }
                     else { assert(false); }
@@ -263,7 +263,7 @@ void calculate_opcode_and_size_add(Instruction* node) {
             } 
             return;
         case R_Unknown: 
-            if (node->label || node->text || node->define || node->imm) {
+            if (node->label || node->text || node->define || node->imm || node->expression.type == T_expression) {
                 switch(node->reg) {
                     case R0: node->opcode = 0xe0; node->inst_size = 3; return;
                     case R1: node->opcode = 0xe1; node->inst_size = 3; return;
@@ -323,7 +323,7 @@ void calculate_opcode_and_size_mov(Instruction* node) {
             } 
             return;
         case R_Unknown: 
-            if (node->label || node->text || node->define || node->imm) {
+            if (node->label || node->text || node->define || node->imm || node->expression.type == T_expression) {
                 switch(node->reg) {
                     case SP: node->opcode = 0x09; node->inst_size = 3; return;
                     case R0: node->opcode = 0x10; node->inst_size = 3; return;
@@ -377,7 +377,7 @@ void calculate_opcode_and_size_ld(Instruction* node) {
             } 
             return;
         case R_Unknown: 
-            if (node->label || node->text || node->define || node->imm) {
+            if (node->label || node->text || node->define || node->imm || node->expression.type == T_expression) {
                 switch(node->reg) {
                     case R0: node->opcode = 0xb4; node->inst_size = 3; return;
                     case R1: node->opcode = 0xb5; node->inst_size = 3; return;
@@ -430,7 +430,7 @@ void calculate_opcode_and_size_ldb(Instruction* node) {
             } 
             return;
         case R_Unknown: 
-            if (node->label || node->text || node->define || node->imm) {
+            if (node->label || node->text || node->define || node->imm || node->expression.type == T_expression) {
                 switch(node->reg) {
                     case R0: node->opcode = 0xb0; node->inst_size = 3; return;
                     case R1: node->opcode = 0xb1; node->inst_size = 3; return;
@@ -483,7 +483,7 @@ void calculate_opcode_and_size_st(Instruction* node) {
             } 
             return;
         case R_Unknown: 
-            if (node->label || node->text || node->define || node->imm) {
+            if (node->label || node->text || node->define || node->imm || node->expression.type == T_expression) {
                 switch(node->reg) {
                     case R0: node->opcode = 0xbc; node->inst_size = 3; return;
                     case R1: node->opcode = 0xbd; node->inst_size = 3; return;
@@ -536,7 +536,7 @@ void calculate_opcode_and_size_stb(Instruction* node) {
             } 
             return;
         case R_Unknown: 
-            if (node->label || node->text || node->define || node->imm) {
+            if (node->label || node->text || node->define || node->imm || node->expression.type == T_expression) {
                 switch(node->reg) {
                     case R0: node->opcode = 0xb8; node->inst_size = 3; return;
                     case R1: node->opcode = 0xb9; node->inst_size = 3; return;
@@ -608,7 +608,7 @@ void calculate_opcode_and_size(Instruction* node) {
     }
 }
 
-void addInstruction(int inst, uint16_t reg, uint16_t regm, char* label, char* text, char* define, char* imm) {
+void addInstruction(int inst, uint16_t reg, uint16_t regm, char* label, char* text, char* define, char* imm, Token token) {
     Instruction* node = &instructions;
     while(node->instruction != T_Unknown) node = node->next;
 
@@ -619,6 +619,7 @@ void addInstruction(int inst, uint16_t reg, uint16_t regm, char* label, char* te
     node->text = NULL;
     node->define = NULL;
     node->imm = NULL;
+    node->expression = token;
 
     if(label) node->label = strdup(label);
     if(text) node->text = strdup(text);
@@ -662,12 +663,46 @@ void dump_code() {
         
         fwrite(&(node->opcode), 1, 1 , output);
 
-        if(node->label || node->define || node->text || node->imm) {
+        if(node->label || node->define || node->text || node->imm || node->expression.type == T_expression) {
             uint16_t data;
             if (node->label) data = find_label(node->label);
             else if (node->define) data = find_define(node->define);
             else if (node->text) data = find_text(node->text);
             else if (node->imm) data = strtol(&(node->imm[1]), NULL, 16);
+            else if (node->expression.type == T_expression) {
+                Token* a = node->expression.a;
+                Token* b = node->expression.b;
+                Token* op = node->expression.op;
+
+                uint16_t value_a;
+                uint16_t value_b;
+
+                switch(a->type) {
+                    case T_Label: value_a = find_label(a->data); break;
+                    case T_Define: value_a = find_define(a->data); break;
+                    case T_TextID: value_a = find_text(a->data); break;
+                    case T_Num: value_a = strtol(&(a->data[1]), NULL, 16); break;
+                    default: assert(false);
+                }
+
+                switch(b->type) {
+                    case T_Label: value_b = find_label(b->data); break;
+                    case T_Define: value_b = find_define(b->data); break;
+                    case T_TextID: value_b = find_text(b->data); break;
+                    case T_Num: value_b = strtol(&(b->data[1]), NULL, 16); break;
+                    default: assert(false);
+                }
+
+                switch(op->type) {
+                    case T_add: data = value_a + value_b; break;
+                    case T_sub: data = value_a - value_b; break;
+                    default: assert(false);
+                }
+
+                free(a);
+                free(b);
+                free(op);
+            }
 
             if (node->instruction == T_I_sys) fwrite(&data, 1, 1 , output); // Syscalls only have 1 byte
             else fwrite(&data, 2, 1 , output);

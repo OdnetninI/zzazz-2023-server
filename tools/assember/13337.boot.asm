@@ -17,9 +17,15 @@ $sys_exit  #0003
 $sys_file  #0004
 $sys_rand  #0005
 
+; Constants
+$break_pointer #fff0 ; When executing the break instruction, it will jump here
+$init_stack    #ff00 ; Init position of stack pointer
+$break_buffer  #fb3e ; Break manager needs data on this position
+$input_buffer  #e000 ; Buffer for user input
+
 ; Entry Point
-	mov %sp, #ff00
-	mov %r0, #fff0
+	mov %sp, $init_stack
+	mov %r0, $break_pointer
 	mov %r1, #0098
 	stb  %r1, [%r0]
 	inc  %r0
@@ -36,72 +42,74 @@ $sys_rand  #0005
 
 :break_mng
 	push %sp
-	st  %r0, [#fb3e]
-	st  %r1, [#fb40]
-	st  %r2, [#fb42]
-	st  %r3, [#fb44]
+	st  %r0, [($break_buffer + #00)]
+	st  %r1, [($break_buffer + #02)]
+	st  %r2, [($break_buffer + #04)]
+	st  %r3, [($break_buffer + #06)]
 	pop %r0
-	st  %r0, [#fb46]
+	st  %r0, [($break_buffer + #08)]
 	mov %r0, %sp
 	ld  %r0, [%r0]
 	add %r0, #ffff
-	st  %r0, [#fb48]
+	st  %r0, [($break_buffer + #0a)]
 	mov %r1, #000c
 	mov %r2 #fb4a
-	ld  %r3, [#fb46]
+	ld  %r3, [($break_buffer + #08)]
 	call $memcpy
 	mov %r2, .break
 	call $print
 
 :ask_for_cmd
 	mov %r0, #0000
-	stb %r0, [#e002]
+	stb %r0, [($input_buffer + #02)]
 	mov %r2, .ready
 	call $print
-	mov %r2, #e000
+	mov %r2, $input_buffer
 	mov %r3, #0008
 	call $readstr
 	cmp %r3, #0000
-	j.z #f0dc
-	mov %r2, #e000
+	j.z :ask_for_cmd_input_too_long
+	mov %r2, $input_buffer
 	call $strtrim
-	ldb %r0, [#e002]
+	ldb %r0, [($input_buffer + #02)]
 	cmp %r0, #0
-	j.n #f0d3
-	ld %r0, [#e000]
-	cmp %r0, #0a68
+	j.n :ask_for_cmd_bad_cmd
+	ld %r0, [($input_buffer + #00)]
+	cmp %r0, 'h\n'
 	j.z :help
-	cmp %r0, #0068
+	cmp %r0, 'h'
 	j.z :help
-	cmp %r0, #0072
+	cmp %r0, 'r'
 	j.z :read_cmd
-	cmp %r0, #0a72
+	cmp %r0, 'r\n'
 	j.z :read_cmd
-	cmp %r0, #0070
+	cmp %r0, 'p'
 	j.z :print_cmd
-	cmp %r0, #0a70
+	cmp %r0, 'p\n'
 	j.z :print_cmd
-	cmp %r0, #0078
+	cmp %r0, 'x'
 	j.z :exec_cmd
-	cmp %r0, #0a78
+	cmp %r0, 'x\n'
 	j.z :exec_cmd
-	cmp %r0, #0063
+	cmp %r0, 'c'
 	j.z :continue_cmd
-	cmp %r0,#0a63
+	cmp %r0, 'c\n'
 	j.z :continue_cmd
-	cmp %r0, #4355
+	cmp %r0, 'UC'
 	j.z :secret_cmd
-	cmp %r0, #736c
+	cmp %r0, 'ls'
 	j.z :ls_cmd
-	cmp %r0, #6672
+	cmp %r0, 'rf'
 	j.z :read_file_cmd
-	cmp %r0, #0077
+	cmp %r0, 'w'
 	j.z :write_cmd
-	cmp %r0, #0a77
+	cmp %r0, 'w\n'
 	j.z :write_cmd
+:ask_for_cmd_bad_cmd
 	mov %r2, .bad_cmd
 	call $print
 	jump :ask_for_cmd
+:ask_for_cmd_input_too_long
 	mov %r2, .input_too_long
 	call $print
 	jump :ask_for_cmd
@@ -114,20 +122,20 @@ $sys_rand  #0005
 :read_cmd
 	mov %r2, .which_addr
 	call $print
-	mov %r2, #e000
+	mov %r2, $input_buffer
 	mov %r3, #0008
 	call $readstr
-	mov %r2, #e000
+	mov %r2, $input_buffer
 	call $convhex
 	cmp %r0, #ffff
 	j.z :read_cmd_invalid
 	push %r0
 	mov %r2, .how_many_lines
 	call $print
-	mov %r2, #e000
+	mov %r2, $input_buffer
 	mov %r3, #0008
 	call $readstr
-	mov %r2, #e000
+	mov %r2, $input_buffer
 	call $convhex
 	cmp %r0, #ffff
 	j.z :read_cmd_invalid
@@ -164,10 +172,10 @@ $sys_rand  #0005
 :write_cmd
 	mov %r2, .which_addr
 	call $print
-	mov %r2, #e000
+	mov %r2, $input_buffer
 	mov %r3, #8
 	call $readstr
-	mov %r2, #e000
+	mov %r2, $input_buffer
 	call $convhex
 	cmp %r0, #ffff
 	j.z :write_cmd_invalid_input
@@ -175,7 +183,7 @@ $sys_rand  #0005
 	mov %r2, .enter_data
 	call $print
 :write_cmd_D
-	mov %r3, #e002
+	mov %r3, ($input_buffer + #02)
 	mov %r0,#0
 	stb %r0, [%r3]
 	dec %r3
@@ -185,9 +193,9 @@ $sys_rand  #0005
 	sys $sys_read
 	stb %r0, [%r3]
 	mov %r2, %r3
-	cmp %r0, #002e
+	cmp %r0, '.'
 	j.z :write_cmd_A
-	cmp %r0, #0a
+	cmp %r0, '\n'
 	j.z :write_cmd_B
 	push %r3
 	call $convhex
@@ -199,9 +207,9 @@ $sys_rand  #0005
 	sys $sys_read
 	stb %r0, [%r3]
 	mov %r2, %r3
-	cmp %r0, #002e
+	cmp %r0, '.'
 	j.z :write_cmd_A
-	cmp %r0,#0a
+	cmp %r0, '\n'
 	j.z :write_cmd_C
 	push %r3
 	call $convhex
@@ -218,7 +226,7 @@ $sys_rand  #0005
 	jump :write_cmd_D
 :write_cmd_A
 	sys $sys_read
-	cmp %r0, #0a
+	cmp %r0, '\n'
 	j.n :write_cmd_A
 	mov %r2, .loaded
 	call $print
@@ -231,10 +239,10 @@ $sys_rand  #0005
 :print_cmd
 	mov %r2, .which_addr
 	call $print
-	mov %r2, #e000
+	mov %r2, $input_buffer
 	mov %r3, #8
 	call $readstr
-	mov %r2, #e000
+	mov %r2, $input_buffer
 	call $convhex
 	mov %r2, %r0
 	call $print
@@ -243,22 +251,22 @@ $sys_rand  #0005
 :exec_cmd
 	mov %r2, .which_addr
 	call $print
-	mov %r2, #e000
+	mov %r2, $input_buffer
 	mov %r3, #8
 	call $readstr
-	mov %r2, #e000
+	mov %r2, $input_buffer
 	call $convhex
 	push %r0
 	st %r0, [#fb5e]
 	mov %r2, .exec_at
 	call $print
-	mov %r2, #e000
+	mov %r2, $input_buffer
 	mov %r3, #8
 	call $readstr
-	ldbi %r0, [#e000]
-	cmp %r0, #59
+	ldbi %r0, [$input_buffer]
+	cmp %r0, 'Y'
 	j.z :exec_cmd_execute
-	cmp %r0, #79
+	cmp %r0, 'y'
 	j.z :exec_cmd_execute
 	mov %r2, .cancelled
 	call $print
@@ -272,19 +280,19 @@ $sys_rand  #0005
 :continue_cmd
 	mov %r2, .continuing
 	call $print
-	ld %r0, [#fb3e]
-	ld %r1, [#fb40]
-	ld %r2, [#fb42]
-	ld %r3, [#fb44]
+	ld %r0, [($break_buffer + #00)]
+	ld %r1, [($break_buffer + #02)]
+	ld %r2, [($break_buffer + #04)]
+	ld %r3, [($break_buffer + #06)]
 	ret
 
 :ls_cmd
 	mov %r2, .ls_header
 	call $print
 	mov %r0, #0
-	mov %r1, #e000
+	mov %r1, $input_buffer
 	sys $sys_file
-	mov %r3, #e000
+	mov %r3, $input_buffer
 :ls_cmd_loop	
 	ldb %r0, [%r3]
 	cmp %r0, #0000
@@ -302,7 +310,7 @@ $sys_rand  #0005
 	inc %r3
 	mov %r2, %r3
 	call $print
-	mov %r0, #000a
+	mov %r0, '\n'
 	sys $sys_write
 	pop %r3
 :ls_cmd_out
@@ -320,7 +328,7 @@ $sys_rand  #0005
 	mov %r2, .filename
 	call $print
 	mov %r0, #0
-	mov %r1, #e000
+	mov %r1, $input_buffer
 	sys $sys_file
 	mov %r2, #efb0
 	mov %r3, #10
@@ -329,7 +337,7 @@ $sys_rand  #0005
 	j.z :inputoo_long
 	mov %r2, #efb0
 	call $strtrim
-	mov %r3, #e003
+	mov %r3, ($input_buffer + #03)
 :read_file_cmd_B
 	mov %r2, #efb0
 	push %r3
@@ -349,7 +357,7 @@ $sys_rand  #0005
 	inc %r3
 	ld %r1, [%r3]
 	push %r1
-	mov %r1, #e000
+	mov %r1, $input_buffer
 	sys $sys_file
 	mov %r2, .which_addr
 	call $print
@@ -362,7 +370,7 @@ $sys_rand  #0005
 	cmp %r0, #ffff
 	j.z :invalid_input
 	mov %r2, %r0
-	mov %r3, #e000
+	mov %r3, $input_buffer
 	call $memcpy
 	mov %r2, .loaded
 	call $print
