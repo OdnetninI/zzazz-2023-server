@@ -83,6 +83,7 @@ int main(int argc, char* argv[]) {
     pc = entry_point;
 
     while(!feof(input)) {
+        uint16_t opcode_pc = pc;
         uint8_t opcode = fgetc(input);
         fprintf(output, "\n\t");
         pc++;
@@ -231,7 +232,7 @@ int main(int argc, char* argv[]) {
                     write_inst("illegal");
                     break;
             }
-        fprintf(output, " ; @%04x opcode %02x ", pc, opcode);
+        fprintf(output, " ; @%04x opcode %02x ", opcode_pc, opcode);
     }
 
     fclose(input);
