@@ -19,6 +19,9 @@ Also, my writeup is on the way :)
   + The structure is fs/$server_id/$file_block
   + $server_id is 0, 1, or 2 (see Usage for more information)
   + $file_block is a 1-byte index of the file
+- tools: several tools for working with GLVM files
+  + assembler: An assembler to compile GLVM ASM into GLVM binary
+  + disassembler: A simple tool that dumps a GLVM binary into GLVM ASM
 
 # Compiling
 It requires a typical modern C compiler.
@@ -44,18 +47,29 @@ Servers id are:
 - 2 -> Server 13339 GRLINFSRV
 
 # Status
+- [ ] Filesystem tools for easily inserting, modifing and deleting files
+- [ ] GLVM Binaries source code
+  + [x] BIOS v1.3
+  + [x] Boot 13337
+  + [ ] Boot 13338
+  + [ ] Boot 13339
+  + [ ] MATHTEST
+  + [ ] REPORT03
+  + [ ] MIX/UNMIX
+- [ ] Opcode 0x07 `MIX`
+- [ ] NOP*
+- [ ] Sockets (For network operation)
 - [x] Main functions implemented
 - [x] BIOS protection
 - [x] Opcodes
 - [x] Filesystem
 - [x] Boot programs
-- [ ] Opcode 0x07
-- [ ] NOP delay? *
-- [ ] Sockets (For network operation)
-- [x] Cleanup
+- [ ] Cleanup
+  + [x] Cleanup 1.0
+  + [ ] Cleanup 2.0
 - [x] Math test data
 
-* There are two NOPs, but knowing that one of the attacks was a timing attack, one of those NOPs, probably, needs a delay to slow down the execution.
+* There are two NOPs, at the begnining I thought a delay was needed for the timing attack, however, is more probable that one of them is the `UNMIX` opcode.
 
 # License
 This project is under the MIT License (see LICENSE for more information).

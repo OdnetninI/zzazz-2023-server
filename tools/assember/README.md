@@ -7,7 +7,7 @@ Usage:
 ```
 
 ## Syntax
-First of all, comments are preceded by a `,`
+First of all, comments are preceded by a `;`
 ```
 ; This is a comment
 ```
@@ -61,10 +61,18 @@ There are also labels. Labels addresses will be defined while assembling because
 	jump :ask_for_cmd
 ```
 
-Lastly, simple expressions are suported by surrounding them in `(` `)`:
+Simple expressions are suported by surrounding them in `(` `)`:
 ```
 mov %r3, ($input_buffer + #02)
 ldb %r0, [($input_buffer + #04)]
+```
+
+Lastly, due to some programs requiring it, implace bytes, surounded by `&`, allows to store data at that specific it is written.
+```
+:hexTable
+	&0123456789abcdefABCDEF\xff&
+:hexLookupTable
+	&\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x0a\x0b\x0c\x0d\x0e\x0f\xff&
 ```
 
 ## Available instructions
