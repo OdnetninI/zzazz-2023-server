@@ -102,11 +102,11 @@ void parse_arg(Token* main) {
             //printf("%s %04x\n", main->data, value);
             addInstruction(main->type, R_Unknown, R_Unknown, NULL, NULL, NULL, t_data.data, t_data);
             break;
-        case T_Register:
+        case T_Register: {
             uint16_t reg = decode_reg(t_data.data);
             //printf("%s %d\n", main->data, reg);
             addInstruction(main->type, reg, R_Unknown, NULL, NULL, NULL, NULL, t_data);
-            break;
+            break; }
         case T_expression:
             //printf("%s %s\n", main->data, t_data.data);
             addInstruction(main->type, R_Unknown, R_Unknown, NULL, NULL, NULL, NULL, t_data);
@@ -143,11 +143,11 @@ void parse_2_args(Token* main) {
             //printf("%s %d, %04x\n", main->data, reg, value);
             addInstruction(main->type, reg, R_Unknown, NULL, NULL, NULL, t_data.data, t_data);
             break;
-        case T_Register:
+        case T_Register: {
             uint16_t reg2 = decode_reg(t_data.data);
             //printf("%s %d, %d\n", main->data, reg, reg2);
             addInstruction(main->type, reg, reg2, NULL, NULL, NULL, NULL, t_data);
-            break;
+            break; }
         case T_expression:
             //printf("%s %d, LABEL %s\n", main->data, reg, t_data.data);
             addInstruction(main->type, reg, R_Unknown, NULL, NULL, NULL, NULL, t_data);
@@ -195,12 +195,12 @@ void parse_2_args_addr(Token* main) {
             //printf("%s %d, [%04x]\n", main->data, reg, value);
             addInstruction(main->type, reg, R_Unknown, NULL, NULL, NULL, t_data.data, t_data);
             break;
-        case T_Register:
+        case T_Register: {
             uint16_t reg2 = decode_reg(t_data.data);
             //printf("%s %d, [%d]\n", main->data, reg, reg2);
             addInstruction(main->type, reg, reg2, NULL, NULL, NULL, NULL, t_data);
-            break;
-        case T_expression:
+            break; }
+        case T_expression: 
             //printf("%s %d, [%s]\n", main->data, reg, t_data.data);
             addInstruction(main->type, reg, R_Unknown, NULL, NULL, NULL, NULL, t_data);
             break;
