@@ -199,11 +199,11 @@ void parse_2_args_addr(Token* main) {
     uint16_t reg = decode_reg(t_reg.data);
 
     switch(t_data.type) {
-        case T_TextID:
+        case T_Label:
             //printf("%s %d, [%s]\n", main->data, reg, t_data.data);
             addInstruction(main->type, reg, R_Unknown, t_data.data, NULL, NULL, NULL, t_data);
             break;
-        case T_Label:
+        case T_TextID:
             //printf("%s %d, [%s]\n", main->data, reg, t_data.data);
             addInstruction(main->type, reg, R_Unknown, NULL, t_data.data, NULL, NULL, t_data);
             break;
