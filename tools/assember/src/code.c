@@ -748,8 +748,10 @@ void dump_code() {
     }
 
     printf("Dumping remaining implaces\n");
-    for (uint16_t i = pc; i < 0xffff; ++i) {
-        i += find_dump_implace(i);
+    for (uint16_t i = pc; i < 0xffff; ) {
+        uint16_t size = find_dump_implace(i);
+        if (size == 0) i++;
+        else i += size;
     }
 
     printf("Code %04x -> %04x\n", entry_point, end_of_code);

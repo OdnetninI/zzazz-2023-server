@@ -54,8 +54,8 @@ Servers id are:
   + [x] Boot 13337
   + [ ] Boot 13338
   + [ ] Boot 13339
-  + [ ] MATHTEST
-  + [ ] REPORT03
+  + [x] MATHTEST
+  + [x] REPORT03
   + [ ] MIX/UNMIX
 - [ ] Opcode 0x07 `MIX`
 - [ ] NOP*
