@@ -244,10 +244,10 @@ int main(int argc, char* argv[]) {
                 case 0xd6: write_inst("or %r0, %r2"); break;
                 case 0xd7: write_inst("or %r0, %r3"); break;
                 case 0xd8: write_inst("xor %r0, %r1"); break;
-                case 0xda: write_inst("xor %r0, %r1"); break;
-                case 0xdb: write_inst("xor %r0, %r2"); break;
-                case 0xdc: write_inst("xor %r0, %r3"); break;
-                case 0xdd ... 0xdf:
+                case 0xd9: write_inst("xor %r0, %r1"); break;
+                case 0xda: write_inst("xor %r0, %r2"); break;
+                case 0xdb: write_inst("xor %r0, %r3"); break;
+                case 0xdc ... 0xdf:
                     write_inst("swap %r0"); 
                     break;
 
