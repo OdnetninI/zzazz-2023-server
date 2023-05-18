@@ -19,6 +19,7 @@ Also, my writeup is on the way :)
   + The structure is fs/$server_id/$file_block
   + $server_id is 0, 1, or 2 (see Usage for more information)
   + $file_block is a 1-byte index of the file
+- programs: Assembly version of the included programs
 - tools: several tools for working with GLVM files
   + assembler: An assembler to compile GLVM ASM into GLVM binary
   + disassembler: A simple tool that dumps a GLVM binary into GLVM ASM
