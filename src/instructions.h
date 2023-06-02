@@ -19,6 +19,11 @@
 *    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.        *
 ****************************************************************************************/
 
+/* Forward declarations */
+typedef bool inst_function();
+inst_function *instructions[0x100];
+inst_function * const original_instructions[0x100];
+
 /**
  * Stack operations
 */
@@ -65,6 +70,16 @@ uint16_t read_op_imm() {
     return imm;
 }
 
+uint32_t mix_rngseed = 0;
+void mix_srand(uint32_t seed) {
+    mix_rngseed = seed;
+}
+
+uint16_t mix_rand() {
+    mix_rngseed = 214013 * mix_rngseed + 2531011;
+    return (mix_rngseed >> 16) & 0x7fff;
+}
+
 /**
  * Opcodes
 */
@@ -107,9 +122,17 @@ bool op_06() {
     return syscall(syscall_id);
 }
 
-bool op_07() {
-    printf("ZZAZZ is trolling us\n");
-    return false;
+bool op_07() {   
+    mix_srand(cpu.mixed_instructions_level);
+    cpu.mixed_instructions_level++;
+
+    for (uint8_t op = 0xff; op > 0; --op) {
+        uint8_t mixed_op = mix_rand() % op;
+        inst_function* tmp = instructions[op];
+        instructions[op] = instructions[mixed_op];
+        instructions[mixed_op] = tmp;
+    }
+    return true;
 }
 
 bool op_08() {
@@ -133,7 +156,10 @@ bool op_0b() {
 }
 
 bool op_0c() {
-    // NOP
+    for (uint16_t op = 0; op < 0x100; ++op) {
+        instructions[op] = original_instructions[op];
+    }
+    cpu.mixed_instructions_level = 0;
     return true;
 }
 
@@ -1123,9 +1149,10 @@ bool op_c3() {
 }
 
 bool op_c4() {
-    printf("Illegal Instruction\n");
-    exit(0);
-    return false;
+    uint16_t value = read_op_imm();
+    push_16(value);
+    cpu.PC += 2;
+    return true;
 }
 
 bool op_c5() {
@@ -1256,17 +1283,17 @@ bool op_dc() {
 }
 
 bool op_dd() {
-    cpu.R0 = (cpu.R0 >> 8) | (cpu.R0 << 8);
+    cpu.R1 = (cpu.R1 >> 8) | (cpu.R1 << 8);
     return true;
 }
 
 bool op_de() {
-    cpu.R0 = (cpu.R0 >> 8) | (cpu.R0 << 8);
+    cpu.R2 = (cpu.R2 >> 8) | (cpu.R2 << 8);
     return true;
 }
 
 bool op_df() {
-    cpu.R0 = (cpu.R0 >> 8) | (cpu.R0 << 8);
+    cpu.R3 = (cpu.R3 >> 8) | (cpu.R3 << 8);
     return true;
 }
 

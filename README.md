@@ -1,5 +1,5 @@
 # A reimplementation of TheZZAZZGlitch's April Fools Event 2023 server
-After the end of the event, most of us were waiting for the server code release. In part because we wanted to understand the 0x07 opcode. But there is no info yet.
+After the end of the event, most of us were waiting for the server code release. In part because we wanted to understand the 0x07 (MIX) opcode.
 
 Most of the information used to build this server was already acquired by Radixan and me (OdnetninI) during the event.
 
@@ -7,7 +7,15 @@ However, I had some missing fragments. I was able to recover them from the follo
 - Muzuwi: https://blog.muzuwi.dev/posts/2023/04/14/fools2023/
 - jfb1337: https://github.com/joefarebrother/Fools2023/blob/main/README.md
 
-Also, my writeup is on the way :)
+Here are my writeups regarding this challenge:
+- The big challenge writeup is on the way :)
+- About the development of the Assembler: https://cohost.org/OdnetninI/post/1441096-finally-i-have-im ( Backup: https://www.edujgh.net/blog.html#zzazz23-comp )
+
+# TheZZAZZGlitch released the code
+Finally, TheZZAZZGlitch released the code (https://github.com/zzazzdzz/fools2023 ). I was able to implement the MIX/UNMIX opcodes successfully.
+
+Also, many thanks TheZZAZZGlitch. Not only for recommending this repository for playing the challenge but also for creating it.
+Thanks for all these years of challenges, we have learned a lot. We wish you all the best :)
 
 # Directory Structure
 - src: server sources
@@ -48,6 +56,7 @@ Servers id are:
 - 2 -> Server 13339 GRLINFSRV
 
 # Status
+- [ ] Use TheZZAZZGlitch's source code to finish adjusting the behaviour
 - [ ] Filesystem tools for easily inserting, modifing and deleting files
 - [ ] GLVM Binaries source code
   + [x] BIOS v1.3
@@ -57,8 +66,7 @@ Servers id are:
   + [x] MATHTEST
   + [x] REPORT03
   + [ ] MIX/UNMIX
-- [ ] Opcode 0x07 `MIX`
-- [ ] NOP*
+- [x] Opcode 0x07 `MIX`
 - [ ] Sockets (For network operation)
 - [x] Main functions implemented
 - [x] BIOS protection
@@ -69,8 +77,6 @@ Servers id are:
   + [x] Cleanup 1.0
   + [ ] Cleanup 2.0
 - [x] Math test data
-
-* There are two NOPs, at the begnining I thought a delay was needed for the timing attack, however, is more probable that one of them is the `UNMIX` opcode.
 
 # License
 This project is under the MIT License (see LICENSE for more information).

@@ -31,6 +31,8 @@ struct CPU {
     bool flag_z;
     bool flag_l;
     bool flag_g;
+
+    uint16_t mixed_instructions_level;
 } cpu;
 
 void initCPU() {
@@ -41,4 +43,6 @@ void initCPU() {
     time_t rawtime;
     time(&rawtime);
     srand(rawtime);
+
+    cpu.mixed_instructions_level = 0;
 }
