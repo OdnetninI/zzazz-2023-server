@@ -83,46 +83,46 @@ uint16_t mix_rand() {
 /**
  * Opcodes
 */
-bool op_00() {
+bool inst_break() {
     push_16(cpu.PC);
     cpu.PC = 0xfff0;
     return true;
 }
 
-bool op_01() {
+bool inst_mul_r0_imm() {
     uint16_t value = read_op_imm();
     cpu.R0 = cpu.R0 * value;
     return true;
 }
 
-bool op_02() {
+bool inst_mul_r0_r1() {
     cpu.R0 = cpu.R0 * cpu.R1;
     return true;
 }
 
-bool op_03() {
+bool inst_div_r0_imm() {
     uint16_t value = read_op_imm();
     cpu.R0 = cpu.R0 / value;
     return true;
 }
 
-bool op_04() {
+bool inst_div_r0_r1() {
     cpu.R0 = cpu.R0 / cpu.R1;
     return true;
 }
 
-bool op_05() {
+bool inst_ret() {
     cpu.PC = pop_16();
     return true;
 }
 
-bool op_06() {
+bool inst_syscall() {
     uint8_t syscall_id = mem_read(cpu.PC);
     cpu.PC++;
     return syscall(syscall_id);
 }
 
-bool op_07() {   
+bool inst_mix() {   
     mix_srand(cpu.mixed_instructions_level);
     cpu.mixed_instructions_level++;
 
@@ -135,27 +135,27 @@ bool op_07() {
     return true;
 }
 
-bool op_08() {
+bool inst_nop() {
     // NOP
     return true;
 }
 
-bool op_09() {
+bool inst_mov_sp_imm() {
     cpu.SP = read_op_imm();
     return true;
 }
 
-bool op_0a() {
+bool inst_mov_r0_sp() {
     cpu.R0 = cpu.SP;
     return true;
 }
 
-bool op_0b() {
+bool inst_mov_r1_sp() {
     cpu.R1 = cpu.SP;
     return true;
 }
 
-bool op_0c() {
+bool inst_unmix() {
     for (uint16_t op = 0; op < 0x100; ++op) {
         instructions[op] = original_instructions[op];
     }
@@ -163,721 +163,721 @@ bool op_0c() {
     return true;
 }
 
-bool op_0d() {
+bool inst_illegal_0d() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_0e() {
+bool inst_sll() {
     cpu.R0 = cpu.R0 << 1;
     return true;
 }
 
-bool op_0f() {
+bool inst_slr() {
     cpu.R0 = cpu.R0 >> 1;
     return true;
 }
 
-bool op_10() {
+bool inst_mov_r0_imm() {
     cpu.R0 = read_op_imm();
     return true;
 }
 
-bool op_11() {
+bool inst_mov_r1_imm() {
     cpu.R1 = read_op_imm();
     return true;
 }
 
-bool op_12() {
+bool inst_mov_r2_imm() {
     cpu.R2 = read_op_imm();
     return true;
 }
 
-bool op_13() {
+bool inst_mov_r3_imm() {
     cpu.R3 = read_op_imm();
     return true;
 }
 
-bool op_14() {
+bool inst_illegal_14() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_15() {
+bool inst_illegal_15() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_16() {
+bool inst_illegal_16() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_17() {
+bool inst_illegal_17() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_18() {
+bool inst_illegal_18() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_19() {
+bool inst_illegal_19() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_1a() {
+bool inst_illegal_1a() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_1b() {
+bool inst_illegal_1b() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_1c() {
+bool inst_illegal_1c() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_1d() {
+bool inst_illegal_1d() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_1e() {
+bool inst_illegal_1e() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_1f() {
+bool inst_illegal_1f() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_20() {
+bool inst_mov_r0_r0() {
     cpu.R0 = cpu.R0;
     return true;
 }
 
-bool op_21() {
+bool inst_mov_r0_r1() {
     cpu.R0 = cpu.R1;
     return true;
 }
 
-bool op_22() {
+bool inst_mov_r0_r2() {
     cpu.R0 = cpu.R2;
     return true;
 }
 
-bool op_23() {
+bool inst_mov_r0_r3() {
     cpu.R0 = cpu.R3;
     return true;
 }
 
-bool op_24() {
+bool inst_mov_r1_r0() {
     cpu.R1 = cpu.R0;
     return true;
 }
 
-bool op_25() {
+bool inst_mov_r1_r1() {
     cpu.R1 = cpu.R1;
     return true;
 }
 
-bool op_26() {
+bool inst_mov_r1_r2() {
     cpu.R1 = cpu.R2;
     return true;
 }
 
-bool op_27() {
+bool inst_mov_r1_r3() {
     cpu.R1 = cpu.R2;
     return true;
 }
 
-bool op_28() {
+bool inst_mov_r2_r0() {
     cpu.R2 = cpu.R0;
     return true;
 }
 
-bool op_29() {
+bool inst_mov_r2_r1() {
     cpu.R2 = cpu.R1;
     return true;
 }
 
-bool op_2a() {
+bool inst_mov_r2_r2() {
     cpu.R2 = cpu.R2;
     return true;
 }
 
-bool op_2b() {
+bool inst_mov_r2_r3() {
     cpu.R2 = cpu.R3;
     return true;
 }
 
-bool op_2c() {
+bool inst_mov_r3_r0() {
     cpu.R3 = cpu.R0;
     return true;
 }
 
-bool op_2d() {
+bool inst_mov_r3_r1() {
     cpu.R3 = cpu.R1;
     return true;
 }
 
-bool op_2e() {
+bool inst_mov_r3_r2() {
     cpu.R3 = cpu.R2;
     return true;
 }
 
-bool op_2f() {
+bool inst_mov_r3_r3() {
     cpu.R3 = cpu.R3;
     return true;
 }
 
-bool op_30() {
+bool inst_add_r0_r0() {
     cpu.R0 += cpu.R0;
     return true;
 }
 
-bool op_31() {
+bool inst_add_r0_r1() {
     cpu.R0 += cpu.R1;
     return true;
 }
 
-bool op_32() {
+bool inst_add_r0_r2() {
     cpu.R0 += cpu.R2;
     return true;
 }
 
-bool op_33() {
+bool inst_add_r0_r3() {
     cpu.R0 += cpu.R3;
     return true;
 }
 
-bool op_34() {
+bool inst_add_r1_r0() {
     cpu.R1 += cpu.R0;
     return true;
 }
 
-bool op_35() {
+bool inst_add_r1_r1() {
     cpu.R1 += cpu.R1;
     return true;
 }
 
-bool op_36() {
+bool inst_add_r1_r2() {
     cpu.R1 += cpu.R2;
     return true;
 }
 
-bool op_37() {
+bool inst_add_r1_r3() {
     cpu.R1 += cpu.R3;
     return true;
 }
 
-bool op_38() {
+bool inst_add_r2_r0() {
     cpu.R2 += cpu.R0;
     return true;
 }
 
-bool op_39() {
+bool inst_add_r2_r1() {
     cpu.R2 += cpu.R1;
     return true;
 }
 
-bool op_3a() {
+bool inst_add_r2_r2() {
     cpu.R2 += cpu.R2;
     return true;
 }
 
-bool op_3b() {
+bool inst_add_r2_r3() {
     cpu.R2 += cpu.R3;
     return true;
 }
 
-bool op_3c() {
+bool inst_add_r3_r0() {
     cpu.R3 += cpu.R0;
     return true;
 }
 
-bool op_3d() {
+bool inst_add_r3_r1() {
     cpu.R3 += cpu.R1;
     return true;
 }
 
-bool op_3e() {
+bool inst_add_r3_r2() {
     cpu.R3 += cpu.R2;
     return true;
 }
 
-bool op_3f() {
+bool inst_add_r3_r3() {
     cpu.R3 += cpu.R3;
     return true;
 }
 
-bool op_40() {
+bool inst_mov_r0_m0() {
     cpu.R0 = mem_read(cpu.R0);
     return true;
 }
 
-bool op_41() {
+bool inst_mov_r0_m1() {
     cpu.R0 = mem_read(cpu.R1);
     return true;
 }
 
-bool op_42() {
+bool inst_mov_r0_m2() {
     cpu.R0 = mem_read(cpu.R2);
     return true;
 }
 
-bool op_43() {
+bool inst_mov_r0_m3() {
     cpu.R0 = mem_read(cpu.R3);
     return true;
 }
 
-bool op_44() {
+bool inst_mov_r1_m0() {
     cpu.R1 = mem_read(cpu.R0);
     return true;
 }
 
-bool op_45() {
+bool inst_mov_r1_m1() {
     cpu.R1 = mem_read(cpu.R1);
     return true;
 }
 
-bool op_46() {
+bool inst_mov_r1_m2() {
     cpu.R1 = mem_read(cpu.R2);
     return true;
 }
 
-bool op_47() {
+bool inst_mov_r1_m3() {
     cpu.R1 = mem_read(cpu.R3);
     return true;
 }
 
-bool op_48() {
+bool inst_mov_r2_m0() {
     cpu.R2 = mem_read(cpu.R0);
     return true;
 }
 
-bool op_49() {
+bool inst_mov_r2_m1() {
     cpu.R2 = mem_read(cpu.R1);
     return true;
 }
 
-bool op_4a() {
+bool inst_mov_r2_m2() {
     cpu.R2 = mem_read(cpu.R2);
     return true;
 }
 
-bool op_4b() {
+bool inst_mov_r2_m3() {
     cpu.R2 = mem_read(cpu.R3);
     return true;
 }
 
-bool op_4c() {
+bool inst_mov_r3_m0() {
     cpu.R3 = mem_read(cpu.R0);
     return true;
 }
 
-bool op_4d() {
+bool inst_mov_r3_m1() {
     cpu.R3 = mem_read(cpu.R1);
     return true;
 }
 
-bool op_4e() {
+bool inst_mov_r3_m2() {
     cpu.R3 = mem_read(cpu.R2);
     return true;
 }
 
-bool op_4f() {
+bool inst_mov_r3_m3() {
     cpu.R3 = mem_read(cpu.R3);
     return true;
 }
 
-bool op_50() {
+bool inst_mov_r0_w0() {
     cpu.R0 = mem_read_16(cpu.R0);
     return true;
 }
 
-bool op_51() {
+bool inst_mov_r0_w1() {
     cpu.R0 = mem_read_16(cpu.R1);
     return true;
 }
 
-bool op_52() {
+bool inst_mov_r0_w2() {
     cpu.R0 = mem_read_16(cpu.R2);
     return true;
 }
 
-bool op_53() {
+bool inst_mov_r0_w3() {
     cpu.R0 = mem_read_16(cpu.R3);
     return true;
 }
 
-bool op_54() {
+bool inst_mov_r1_w0() {
     cpu.R1 = mem_read_16(cpu.R0);
     return true;
 }
 
-bool op_55() {
+bool inst_mov_r1_w1() {
     cpu.R1 = mem_read_16(cpu.R1);
     return true;
 }
 
-bool op_56() {
+bool inst_mov_r1_w2() {
     cpu.R1 = mem_read_16(cpu.R2);
     return true;
 }
 
-bool op_57() {
+bool inst_mov_r1_w3() {
     cpu.R1 = mem_read_16(cpu.R3);
     return true;
 }
 
-bool op_58() {
+bool inst_mov_r2_w0() {
     cpu.R2 = mem_read_16(cpu.R0);
     return true;
 }
 
-bool op_59() {
+bool inst_mov_r2_w1() {
     cpu.R2 = mem_read_16(cpu.R1);
     return true;
 }
 
-bool op_5a() {
+bool inst_mov_r2_w2() {
     cpu.R2 = mem_read_16(cpu.R2);
     return true;
 }
 
-bool op_5b() {
+bool inst_mov_r2_w3() {
     cpu.R2 = mem_read_16(cpu.R3);
     return true;
 }
 
-bool op_5c() {
+bool inst_mov_r3_w0() {
     cpu.R3 = mem_read_16(cpu.R0);
     return true;
 }
 
-bool op_5d() {
+bool inst_mov_r3_w1() {
     cpu.R3 = mem_read_16(cpu.R1);
     return true;
 }
 
-bool op_5e() {
+bool inst_mov_r3_w2() {
     cpu.R3 = mem_read_16(cpu.R2);
     return true;
 }
 
-bool op_5f() {
+bool inst_mov_r3_w3() {
     cpu.R3 = mem_read_16(cpu.R3);
     return true;
 }
 
-bool op_60() {
+bool inst_mov_m0_r0() {
     mem_write(cpu.R0, cpu.R0);
     return true;
 }
 
-bool op_61() {
+bool inst_mov_m0_r1() {
     mem_write(cpu.R0, cpu.R1);
     return true;
 }
 
-bool op_62() {
+bool inst_mov_m0_r2() {
     mem_write(cpu.R0, cpu.R2);
     return true;
 }
 
-bool op_63() {
+bool inst_mov_m0_r3() {
     mem_write(cpu.R0, cpu.R3);
     return true;
 }
 
-bool op_64() {
+bool inst_mov_m1_r0() {
     mem_write(cpu.R1, cpu.R0);
     return true;
 }
 
-bool op_65() {
+bool inst_mov_m1_r1() {
     mem_write(cpu.R1, cpu.R1);
     return true;
 }
 
-bool op_66() {
+bool inst_mov_m1_r2() {
     mem_write(cpu.R1, cpu.R2);
     return true;
 }
 
-bool op_67() {
+bool inst_mov_m1_r3() {
     mem_write(cpu.R1, cpu.R3);
     return true;
 }
 
-bool op_68() {
+bool inst_mov_m2_r0() {
     mem_write(cpu.R2, cpu.R0);
     return true;
 }
 
-bool op_69() {
+bool inst_mov_m2_r1() {
     mem_write(cpu.R2, cpu.R1);
     return true;
 }
 
-bool op_6a() {
+bool inst_mov_m2_r2() {
     mem_write(cpu.R2, cpu.R2);
     return true;
 }
 
-bool op_6b() {
+bool inst_mov_m2_r3() {
     mem_write(cpu.R2, cpu.R3);
     return true;
 }
 
-bool op_6c() {
+bool inst_mov_m3_r0() {
     mem_write(cpu.R3, cpu.R0);
     return true;
 }
 
-bool op_6d() {
+bool inst_mov_m3_r1() {
     mem_write(cpu.R3, cpu.R1);
     return true;
 }
 
-bool op_6e() {
+bool inst_mov_m3_r2() {
     mem_write(cpu.R3, cpu.R2);
     return true;
 }
 
-bool op_6f() {
+bool inst_mov_m3_r3() {
     mem_write(cpu.R3, cpu.R3);
     return true;
 }
 
-bool op_70() {
+bool inst_mov_w0_r0() {
     mem_write_16(cpu.R0, cpu.R0);
     return true;
 }
 
-bool op_71() {
+bool inst_mov_w0_r1() {
     mem_write_16(cpu.R0, cpu.R1);
     return true;
 }
 
-bool op_72() {
+bool inst_mov_w0_r2() {
     mem_write_16(cpu.R0, cpu.R2);
     return true;
 }
 
-bool op_73() {
+bool inst_mov_w0_r3() {
     mem_write_16(cpu.R0, cpu.R3);
     return true;
 }
 
-bool op_74() {
+bool inst_mov_w1_r0() {
     mem_write_16(cpu.R1, cpu.R0);
     return true;
 }
 
-bool op_75() {
+bool inst_mov_w1_r1() {
     mem_write_16(cpu.R1, cpu.R1);
     return true;
 }
 
-bool op_76() {
+bool inst_mov_w1_r2() {
     mem_write_16(cpu.R1, cpu.R2);
     return true;
 }
 
-bool op_77() {
+bool inst_mov_w1_r3() {
     mem_write_16(cpu.R1, cpu.R3);
     return true;
 }
 
-bool op_78() {
+bool inst_mov_w2_r0() {
     mem_write_16(cpu.R2, cpu.R0);
     return true;
 }
 
-bool op_79() {
+bool inst_mov_w2_r1() {
     mem_write_16(cpu.R2, cpu.R1);
     return true;
 }
 
-bool op_7a() {
+bool inst_mov_w2_r2() {
     mem_write_16(cpu.R2, cpu.R2);
     return true;
 }
 
-bool op_7b() {
+bool inst_mov_w2_r3() {
     mem_write_16(cpu.R2, cpu.R3);
     return true;
 }
 
-bool op_7c() {
+bool inst_mov_w3_r0() {
     mem_write_16(cpu.R3, cpu.R0);
     return true;
 }
 
-bool op_7d() {
+bool inst_mov_w3_r1() {
     mem_write_16(cpu.R3, cpu.R1);
     return true;
 }
 
-bool op_7e() {
+bool inst_mov_w3_r2() {
     mem_write_16(cpu.R3, cpu.R2);
     return true;
 }
 
-bool op_7f() {
+bool inst_mov_w3_r3() {
     mem_write_16(cpu.R3, cpu.R3);
     return true;
 }
 
-bool op_80() {
+bool inst_cmp_r0_r0() {
     cmp(cpu.R0, cpu.R0);
     return true;
 }
 
-bool op_81() {
+bool inst_cmp_r0_r1() {
     cmp(cpu.R0, cpu.R1);
     return true;
 }
 
-bool op_82() {
+bool inst_cmp_r0_r2() {
     cmp(cpu.R0, cpu.R2);
     return true;
 }
 
-bool op_83() {
+bool inst_cmp_r0_r3() {
     cmp(cpu.R0, cpu.R3);
     return true;
 }
 
-bool op_84() {
+bool inst_cmp_r1_r0() {
     cmp(cpu.R1, cpu.R0);
     return true;
 }
 
-bool op_85() {
+bool inst_cmp_r1_r1() {
     cmp(cpu.R1, cpu.R1);
     return true;
 }
 
-bool op_86() {
+bool inst_cmp_r1_r2() {
     cmp(cpu.R1, cpu.R2);
     return true;
 }
 
-bool op_87() {
+bool inst_cmp_r1_r3() {
     cmp(cpu.R1, cpu.R3);
     return true;
 }
 
-bool op_88() {
+bool inst_cmp_r2_r0() {
     cmp(cpu.R2, cpu.R0);
     return true;
 }
 
-bool op_89() {
+bool inst_cmp_r2_r1() {
     cmp(cpu.R2, cpu.R1);
     return true;
 }
 
-bool op_8a() {
+bool inst_cmp_r2_r2() {
     cmp(cpu.R2, cpu.R2);
     return true;
 }
 
-bool op_8b() {
+bool inst_cmp_r2_r3() {
     cmp(cpu.R2, cpu.R3);
     return true;
 }
 
-bool op_8c() {
+bool inst_cmp_r3_r0() {
     cmp(cpu.R3, cpu.R0);
     return true;
 }
 
-bool op_8d() {
+bool inst_cmp_r3_r1() {
     cmp(cpu.R3, cpu.R1);
     return true;
 }
 
-bool op_8e() {
+bool inst_cmp_r3_r2() {
     cmp(cpu.R3, cpu.R2);
     return true;
 }
 
-bool op_8f() {
+bool inst_cmp_r3_r3() {
     cmp(cpu.R3, cpu.R3);
     return true;
 }
 
-bool op_90() {
+bool inst_push_r0() {
     push_16(cpu.R0);
     return true;
 }
 
-bool op_91() {
+bool inst_push_r1() {
     push_16(cpu.R1);
     return true;
 }
 
-bool op_92() {
+bool inst_push_r2() {
     push_16(cpu.R2);
     return true;
 }
 
-bool op_93() {
+bool inst_push_r3() {
     push_16(cpu.R3);
     return true;
 }
 
-bool op_94() {
+bool inst_pop_r0() {
     cpu.R0 = pop_16();
     return true;
 }
 
-bool op_95() {
+bool inst_pop_r1() {
     cpu.R1 = pop_16();
     return true;
 }
 
-bool op_96() {
+bool inst_pop_r2() {
     cpu.R2 = pop_16();
     return true;
 }
 
-bool op_97() {
+bool inst_pop_r3() {
     cpu.R3 = pop_16();
     return true;
 }
 
-bool op_98() {
+bool inst_jump_imm() {
     uint16_t dest_addr = mem_read_16(cpu.PC);
     cpu.PC = dest_addr;
     return true;
 }
 
-bool op_99() {
+bool inst_call_imm() {
     uint16_t dest_addr = read_op_imm();
 
     push_16(cpu.PC);
@@ -886,35 +886,35 @@ bool op_99() {
     return true;
 }
 
-bool op_9a() {
+bool inst_jlt_imm() {
     uint16_t value = read_op_imm();
 
     if (cpu.flag_l) cpu.PC = value;
     return true;
 }
 
-bool op_9b() {
+bool inst_jgt_imm() {
     uint16_t value = read_op_imm();
     
     if (cpu.flag_g) cpu.PC = value;
     return true;
 }
 
-bool op_9c() {
+bool inst_jeq_imm() {
     uint16_t value = read_op_imm();
     
     if (cpu.flag_z) cpu.PC = value;
     return true;
 }
 
-bool op_9d() {
+bool inst_jne_imm() {
     uint16_t value = read_op_imm();
     
     if (!cpu.flag_z) cpu.PC = value;
     return true;
 }
 
-bool op_9e() {
+bool inst_clt_imm() {
     uint16_t dest_addr = read_op_imm();
 
     if (cpu.flag_l) {
@@ -924,7 +924,7 @@ bool op_9e() {
     return true;
 }
 
-bool op_9f() {
+bool inst_cgt_imm() {
     uint16_t dest_addr = read_op_imm();
 
     if (cpu.flag_g) {
@@ -934,7 +934,7 @@ bool op_9f() {
     return true;
 }
 
-bool op_a0() {
+bool inst_ceq_imm() {
     uint16_t dest_addr = read_op_imm();
 
     if (cpu.flag_z) {
@@ -944,7 +944,7 @@ bool op_a0() {
     return true;
 }
 
-bool op_a1() {
+bool inst_cne_imm() {
     uint16_t dest_addr = read_op_imm();
 
     if (!cpu.flag_z) {
@@ -954,536 +954,536 @@ bool op_a1() {
     return true;
 }
 
-bool op_a2() {
+bool inst_cmp_r0_imm() {
     uint16_t value = read_op_imm();
     cmp(cpu.R0, value);
     return true;
 }
 
-bool op_a3() {
+bool inst_cmp_r1_imm() {
     uint16_t value = read_op_imm();
     cmp(cpu.R1, value);
     return true;
 }
 
-bool op_a4() {
+bool inst_cmp_r2_imm() {
     uint16_t value = read_op_imm();
     cmp(cpu.R2, value);
     return true;
 }
 
-bool op_a5() {
+bool inst_cmp_r3_imm() {
     uint16_t value = read_op_imm();
     cmp(cpu.R3, value);
     return true;
 }
 
-bool op_a6() {
+bool inst_push_sp() {
     push_16(cpu.SP);
     return true;
 }
 
-bool op_a7() {
+bool inst_push_pc() {
     push_16(cpu.PC - 1);
     return true;
 }
 
-bool op_a8() {
+bool inst_inc_r0() {
     cpu.R0++;
     return true;
 }
 
-bool op_a9() {
+bool inst_inc_r1() {
     cpu.R1++;
     return true;
 }
 
-bool op_aa() {
+bool inst_inc_r2() {
     cpu.R2++;
     return true;
 }
 
-bool op_ab() {
+bool inst_inc_r3() {
     cpu.R3++;
     return true;
 }
 
-bool op_ac() {
+bool inst_dec_r0() {
     cpu.R0--;
     return true;
 }
 
-bool op_ad() {
+bool inst_dec_r1() {
     cpu.R1--;
     return true;
 }
 
-bool op_ae() {
+bool inst_dec_r2() {
     cpu.R2--;
     return true;
 }
 
-bool op_af() {
+bool inst_dec_r3() {
     cpu.R3--;
     return true;
 }
 
-bool op_b0() {
+bool inst_mov_r0_mimm() {
     uint16_t address = read_op_imm();
     cpu.R0 = mem_read(address);
     return true;
 }
 
-bool op_b1() {
+bool inst_mov_r1_mimm() {
     uint16_t address = read_op_imm();
     cpu.R1 = mem_read(address);
     return true;
 }
 
-bool op_b2() {
+bool inst_mov_r2_mimm() {
     uint16_t address = read_op_imm();
     cpu.R2 = mem_read(address);
     return true;
 }
 
-bool op_b3() {
+bool inst_mov_r3_mimm() {
     uint16_t address = read_op_imm();
     cpu.R3 = mem_read(address);
     return true;
 }
 
-bool op_b4() {
+bool inst_mov_r0_wimm() {
     uint16_t address = read_op_imm();
     cpu.R0 = mem_read_16(address);
     return true;
 }
 
-bool op_b5() {
+bool inst_mov_r1_wimm() {
     uint16_t address = read_op_imm();
     cpu.R1 = mem_read_16(address);
     return true;
 }
 
-bool op_b6() {
+bool inst_mov_r2_wimm() {
     uint16_t address = read_op_imm();
     cpu.R2 = mem_read_16(address);
     return true;
 }
 
-bool op_b7() {
+bool inst_mov_r3_wimm() {
     uint16_t address = read_op_imm();
     cpu.R3 = mem_read_16(address);
     return true;
 }
 
-bool op_b8() {
+bool inst_mov_mimm_r0() {
     uint16_t address = read_op_imm();
     mem_write(address, cpu.R0 & 0xff);
     return true;
 }
 
-bool op_b9() {
+bool inst_mov_mimm_r1() {
     uint16_t address = read_op_imm();
     mem_write(address, cpu.R1 & 0xff);
     return true;
 }
 
-bool op_ba() {
+bool inst_mov_mimm_r2() {
     uint16_t address = read_op_imm();
     mem_write(address, cpu.R2 & 0xff);
     return true;
 }
 
-bool op_bb() {
+bool inst_mov_mimm_r3() {
     uint16_t address = read_op_imm();
     mem_write(address, cpu.R3 & 0xff);
     return true;
 }
 
-bool op_bc() {
+bool inst_mov_wimm_r0() {
     uint16_t address = read_op_imm();
     mem_write_16(address, cpu.R0);
     return true;
 }
 
-bool op_bd() {
+bool inst_mov_wimm_r1() {
     uint16_t address = read_op_imm();
     mem_write_16(address, cpu.R1);
     return true;
 }
 
-bool op_be() {
+bool inst_mov_wimm_r2() {
     uint16_t address = read_op_imm();
     mem_write_16(address, cpu.R2);
     return true;
 }
 
-bool op_bf() {
+bool inst_mov_wimm_r3() {
     uint16_t address = read_op_imm();
     mem_write_16(address, cpu.R3);
     return true;
 }
 
-bool op_c0() {
+bool inst_illegal_c0() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_c1() {
+bool inst_illegal_c1() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_c2() {
+bool inst_illegal_c2() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_c3() {
+bool inst_illegal_c3() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_c4() {
+bool inst_push_imm() {
     uint16_t value = read_op_imm();
     push_16(value);
     cpu.PC += 2;
     return true;
 }
 
-bool op_c5() {
+bool inst_jump_r0() {
     cpu.PC = cpu.R0;
     return true;
 }
 
-bool op_c6() {
+bool inst_jump_r1() {
     cpu.PC = cpu.R1;
     return true;
 }
 
-bool op_c7() {
+bool inst_jump_r2() {
     cpu.PC = cpu.R2;
     return true;
 }
 
-bool op_c8() {
+bool inst_jump_r3() {
     cpu.PC = cpu.R3;
     return true;
 }
 
-bool op_c9() {
+bool inst_call_r0() {
     push_16(cpu.PC);
     cpu.PC = cpu.R0;
     return true;
 }
 
-bool op_ca() {
+bool inst_call_r1() {
     push_16(cpu.PC);
     cpu.PC = cpu.R1;
     return true;
 }
 
-bool op_cb() {
+bool inst_call_r2() {
     push_16(cpu.PC);
     cpu.PC = cpu.R2;
     return true;
 }
 
-bool op_cc() {
+bool inst_call_r3() {
     push_16(cpu.PC);
     cpu.PC = cpu.R3;
     return true;
 }
 
-bool op_cd() {
+bool inst_and_r0_imm() {
     uint16_t value = read_op_imm();
     cpu.R0 = cpu.R0 & value;
     return true;
 }
 
-bool op_ce() {
+bool inst_or_r0_imm() {
     uint16_t value = read_op_imm();
     cpu.R0 = cpu.R0 | value;
     return true;
 }
 
-bool op_cf() {
-uint16_t value = read_op_imm();
+bool inst_xor_r0_imm() {
+    uint16_t value = read_op_imm();
     cpu.R0 = cpu.R0 ^ value;
     return true;
 }
 
-bool op_d0() {
+bool inst_and_r0_r0() {
     cpu.R0 = cpu.R0 & cpu.R0;
     return true;
 }
 
-bool op_d1() {
+bool inst_and_r0_r1() {
     cpu.R0 = cpu.R0 & cpu.R1;
     return true;
 }
 
-bool op_d2() {
+bool inst_and_r0_r2() {
     cpu.R0 = cpu.R0 & cpu.R2;
     return true;
 }
 
-bool op_d3() {
+bool inst_and_r0_r3() {
     cpu.R0 = cpu.R0 & cpu.R3;
     return true;
 }
 
-bool op_d4() {
+bool inst_or_r0_r0() {
     cpu.R0 = cpu.R0 | cpu.R0;
     return true;
 }
 
-bool op_d5() {
+bool inst_or_r0_r1() {
     cpu.R0 = cpu.R0 | cpu.R1;
     return true;
 }
 
-bool op_d6() {
+bool inst_or_r0_r2() {
     cpu.R0 = cpu.R0 | cpu.R2;
     return true;
 }
 
-bool op_d7() {
+bool inst_or_r0_r3() {
     cpu.R0 = cpu.R0 | cpu.R3;
     return true;
 }
 
-bool op_d8() {
+bool inst_xor_r0_r0() {
     cpu.R0 = cpu.R0 ^ cpu.R0;
     return true;
 }
 
-bool op_d9() {
+bool inst_xor_r0_r1() {
     cpu.R0 = cpu.R0 ^ cpu.R1;
     return true;
 }
 
-bool op_da() {
+bool inst_xor_r0_r2() {
     cpu.R0 = cpu.R0 ^ cpu.R2;
     return true;
 }
 
-bool op_db() {
+bool inst_xor_r0_r3() {
     cpu.R0 = cpu.R0 ^ cpu.R3;
     return true;
 }
 
-bool op_dc() {
+bool inst_swap_r0() {
     cpu.R0 = (cpu.R0 >> 8) | (cpu.R0 << 8);
     return true;
 }
 
-bool op_dd() {
+bool inst_swap_r1() {
     cpu.R1 = (cpu.R1 >> 8) | (cpu.R1 << 8);
     return true;
 }
 
-bool op_de() {
+bool inst_swap_r2() {
     cpu.R2 = (cpu.R2 >> 8) | (cpu.R2 << 8);
     return true;
 }
 
-bool op_df() {
+bool inst_swap_r3() {
     cpu.R3 = (cpu.R3 >> 8) | (cpu.R3 << 8);
     return true;
 }
 
-bool op_e0() {
+bool inst_add_r0_imm() {
     uint16_t value = read_op_imm();
     cpu.R0 += value;
     return true;
 }
 
-bool op_e1() {
+bool inst_add_r1_imm() {
     uint16_t value = read_op_imm();
     cpu.R1 += value;
     return true;
 }
 
-bool op_e2() {
+bool inst_add_r2_imm() {
     uint16_t value = read_op_imm();
     cpu.R2 += value;
     return true;
 }
 
-bool op_e3() {
+bool inst_add_r3_imm() {
     uint16_t value = read_op_imm();
     cpu.R3 += value;
     return true;
 }
 
-bool op_e4() {
+bool inst_illegal_e4() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_e5() {
+bool inst_illegal_e5() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_e6() {
+bool inst_illegal_e6() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_e7() {
+bool inst_illegal_e7() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_e8() {
+bool inst_illegal_e8() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_e9() {
+bool inst_illegal_e9() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_ea() {
+bool inst_illegal_ea() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_eb() {
+bool inst_illegal_eb() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_ec() {
+bool inst_illegal_ec() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_ed() {
+bool inst_illegal_ed() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_ee() {
+bool inst_illegal_ee() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_ef() {
+bool inst_illegal_ef() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_f0() {
+bool inst_illegal_f0() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_f1() {
+bool inst_illegal_f1() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_f2() {
+bool inst_illegal_f2() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_f3() {
+bool inst_illegal_f3() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_f4() {
+bool inst_illegal_f4() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_f5() {
+bool inst_illegal_f5() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_f6() {
+bool inst_illegal_f6() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_f7() {
+bool inst_illegal_f7() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_f8() {
+bool inst_illegal_f8() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_f9() {
+bool inst_illegal_f9() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_fa() {
+bool inst_illegal_fa() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_fb() {
+bool inst_illegal_fb() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_fc() {
+bool inst_illegal_fc() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_fd() {
+bool inst_illegal_fd() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_fe() {
+bool inst_illegal_fe() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
 }
 
-bool op_ff() {
+bool inst_illegal_ff() {
     printf("Illegal Instruction\n");
     exit(0);
     return false;
